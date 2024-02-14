@@ -1,0 +1,14 @@
+.ChessBoard{
+background-color: blue;
+display: grid;
+
+grid-template-columns: repeat(8,12.5dvh);
+grid-template-rows: repeat(8,12.5dvh);
+
+height: 100dvh;
+width: 100dvh;
+
+grid: gap 1px;
+
+
+}

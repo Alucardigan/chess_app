@@ -1,0 +1,14 @@
+.Tile{
+    height:12.5dvh;
+    width: 12.5dvh;
+    
+}
+#Tile.black-tile{
+    background-color: #32684b;
+    outline: 1px solid green;
+}
+#Tile.white-tile{
+    background-color: white;
+    outline: 1px solid green;
+    
+}
