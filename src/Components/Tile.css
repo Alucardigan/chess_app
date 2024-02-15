@@ -1,14 +1,25 @@
 .Tile{
     height:12.5dvh;
     width: 12.5dvh;
+    display: grid;
+    place-items: center;
+
     
 }
 #Tile.black-tile{
     background-color: #32684b;
     outline: 1px solid green;
+    display: inherit;
+    place-items: center;
 }
 #Tile.white-tile{
     background-color: white;
     outline: 1px solid green;
-    
+    display: inherit;
+    place-items: center;
+}
+
+.piece-image{
+    height: 90%;
+    width: 90%;
 }
