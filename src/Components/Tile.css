@@ -3,7 +3,8 @@
     width: 12.5dvh;
     display: grid;
     place-items: center;
-
+    background-repeat: no-repeat;
+    background-position: center;
     
 }
 #Tile.black-tile{
@@ -11,12 +12,16 @@
     outline: 1px solid green;
     display: inherit;
     place-items: center;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 #Tile.white-tile{
     background-color: white;
     outline: 1px solid green;
     display: inherit;
     place-items: center;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .piece-image{

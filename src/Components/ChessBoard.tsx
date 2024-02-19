@@ -21,7 +21,7 @@ export default function ChessBoard(){
         console.log(pieces[i].posX,pieces[i].posY,pieces[i].imageLink)
         board[tileIdx] = <Tile TileX={pieces[i].posX} TileY={pieces[i].posY} imageLink={pieces[i].imageLink}></Tile>
     }
-    return <div className="ChessBoard">
+    return <div className="ChessBoard" >
         {board}
     </div>
 }
