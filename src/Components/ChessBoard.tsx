@@ -6,21 +6,7 @@ import { Piece } from "../Game-classes/Piece";
 import {Game} from "../Game-classes/Game";
 import { JsxElement } from "typescript";
 
-class BoardState{
-    boardState: Piece[]
-    constructor(){
-        this.boardState = []
-    }
-    updateBoardState(players:Player[]){
-        for(let i =0;i<players.length;i++){
-            let player = players[i];
-            this.boardState = this.boardState.concat(player.pieces);
-        }
-    }
-    getBoardState(){
-        return this.boardState;
-    }
-}
+
 interface ChessBoardProps{
     gameBoardState: Piece[]
 }
@@ -43,4 +29,3 @@ export default function ChessBoard(gameState:ChessBoardProps):JSX.Element{
         {board}
     </div>
 }
-export {BoardState}
