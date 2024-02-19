@@ -4,7 +4,8 @@ import "./Tile.css"
 
 export default function Tile({TileX,TileY,imageLink=undefined}:{TileX:number,TileY:number,imageLink?:undefined|string}){
     function handleClick(e:MouseEvent){
-        console.log(TileX,TileY);
+        
+
         
     }
     
