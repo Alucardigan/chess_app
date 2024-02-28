@@ -24,6 +24,11 @@ export default function ChessBoard():JSX.Element{
                 intialBoard.push({x:i,y:j,cookie:intialBoard.length,piece:undefined})
             }
         }
+        let pieces = gameState.currentBoardState;
+        for(let i=0;i<pieces.length;i++){
+            let tileIdx = (pieces[i].posX-1)*8 + pieces[i].posY-1
+            intialBoard[tileIdx] = {x:pieces[i].posX,y:pieces[i].posY,cookie:tileIdx,piece:pieces[i]}
+        }
         
         return intialBoard;
     }
@@ -32,17 +37,7 @@ export default function ChessBoard():JSX.Element{
     let selectedPiece = useRef<number|null>(null);
     
     let [board,setBoard] = useState<Square[]>(intialBoardSetup());
-    useEffect(()=>{
-        console.log('setup piece')
-        let pieces = gameState.currentBoardState;
-        let newBoard = [...board];
-        for(let i=0;i<pieces.length;i++){
-            let tileIdx = (pieces[i].posX-1)*8 + pieces[i].posY-1
-            newBoard[tileIdx] = {x:pieces[i].posX,y:pieces[i].posY,cookie:tileIdx,piece:pieces[i]}
-        }
-        
-        setBoard(newBoard);
-    },[gameState.currentBoardState])
+    
     function handleClick(e:MouseEvent,key:number){
         if(selectedPiece.current!== null){
             let newBoard = [...board]
