@@ -1,21 +1,27 @@
-import React, { MouseEvent } from "react";
+import React, { MouseEvent, useState } from "react";
 import "./Tile.css"
 import { useContext } from "react";
 import GameContext from "../Game-classes/GameContext";
-export default function Tile({TileX,TileY,imageLink=undefined}:{TileX:number,TileY:number,imageLink?:undefined|string}){
-    let GameState = useContext(GameContext);
-    function handleClick(e:MouseEvent){
-        
-        GameState.selectTile(TileX,TileY);
-    }
+import { Game, cloneGame } from "../Game-classes/Game";
+import { Piece } from "../Game-classes/Piece";
+
+interface mouseHandlerType{
+    (a:MouseEvent,key:number):void;
+}
+
+
+export default function Tile({TileX,TileY,cookie,piece=undefined,mouseHandler}:{TileX:number,TileY:number,cookie:number,piece?:undefined|Piece,mouseHandler:mouseHandlerType}){
+    
+    
     
     if((TileX+TileY)%2){
-        return <div id="Tile" onClick={e=>handleClick(e)} className="black-tile" style= {{backgroundImage:`url(${imageLink})`}}>
+        
+        return <div id="Tile"  onMouseDown={(e)=>mouseHandler(e,cookie)} className="black-tile" style= {{backgroundImage:`url(${piece?.imageLink})`}}>
         
         </div>
     }
     else{
-        return <div id="Tile" onClick={e=>handleClick(e)}   className="white-tile" style= {{backgroundImage:`url(${imageLink})`}}>
+        return <div id="Tile"  onMouseDown={(e)=>mouseHandler(e,cookie)}  className="white-tile" style= {{backgroundImage:`url(${piece?.imageLink})`}}>
            
         </div>
     }

@@ -1,47 +1,38 @@
 import { BlackPlayer, Player, WhitePlayer } from "./Player";
-import { createContext } from "react";
-import { BoardState } from "../Components/BoardState";
+import { useContext } from "react";
+import GameContext from "./GameContext";
+import { Piece } from "./Piece";
 
 
-class Game{
+export class Game{
     turns: number;
     players: Player[]
-    currentBoardState: BoardState
-    currentPlayer:Player
+    currentBoardState: Piece[]
+    selectedPiece: Piece|null;
     constructor(){
         this.turns = 0;
         this.players = this.intialisePlayers();
-        this.currentPlayer = this.determinePlayer();
         this.currentBoardState = this.intialiseBoardState();
+        this.selectedPiece = null;
     }
-    private intialisePlayers():Player[]{
+    intialisePlayers():Player[]{
         let playerWhite = new WhitePlayer();
         let playerBlack = new BlackPlayer();
         return [playerWhite,playerBlack];
     }
-    private determinePlayer():Player{
-        return (this.turns%2) ? this.players[0] : this.players[1]; 
+    determinePlayer():number{
+        return (this.turns%2); 
     }
-    private intialiseBoardState(){
-        
-        let board = new BoardState();
-        board.updateBoardState(this.players)
-        return board
+    intialiseBoardState(){
+        let board:Piece[] = [];
+        this.players.forEach((player)=>board = board.concat(player.pieces));
+        return board;
     }
-    
-    selectTile(tileX:number,tileY:number){
-        
-        this.currentPlayer = this.determinePlayer();
-        let board = this.currentBoardState.getBoardState()
-        for(let i =0;i<board.length;i++){
-            if(board[i].posX == tileX && board[i].posY==tileY){
-                
-            }
-        }
-        
-    }
-
     
 }
+export function cloneGame(gameToClone: Game){
+    let gameClone = structuredClone(gameToClone);
+    Object.setPrototypeOf(gameClone,Object.getPrototypeOf(gameToClone));
+    return gameClone;
+}
 
-export {Game};

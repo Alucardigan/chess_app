@@ -1,25 +1,18 @@
-import React, { useContext } from 'react';
+import React, { useContext,useState } from 'react';
 import './App.css';
 import ChessBoard from './Components/ChessBoard';
 import { Game} from './Game-classes/Game';
-import { createContext,useState } from 'react';
 import GameContext from './Game-classes/GameContext';
 
 
 function App() {
-  const GameState = useContext(GameContext);
-  let newGame = new Game();
-  newGame.selectTile(1,1);
-  const [gameEngine,setGameState] = useState(newGame);
-  
-
-  let newBoardState = gameEngine.currentBoardState.getBoardState()
+  let [gameState,setGameState] = useState(new Game());
 
 
   return (
     <div className="App">
-      <GameContext.Provider value={gameEngine}>
-        <ChessBoard gameBoardState={newBoardState}/>
+      <GameContext.Provider value={{gameState,setGameState}}>
+        <ChessBoard></ChessBoard>
       </GameContext.Provider>
       
     </div>

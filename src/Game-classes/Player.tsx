@@ -3,9 +3,11 @@ import { Pawn,Rook,Knight,Bishop,Queen,King,Color,Piece} from "./Piece"
 class Player{
     color:Color;
     pieces: Piece[];
+    selectedPiece: Piece|null;
     constructor(){
         this.color = Color.UNASSIGNED;
         this.pieces = []
+        this.selectedPiece = null;
         
     };
     intialisePawns(PawnRow:number,PawnColumnStart:number,PawnColumnEnd:number){
