@@ -21,14 +21,11 @@ export default function ChessBoard():JSX.Element{
         let intialBoard = []
         for(let i=1; i <= BOARD_SIZE; i++){
             for(let j= 1; j <= BOARD_SIZE;j++){
-                intialBoard.push({x:i,y:j,cookie:intialBoard.length,piece:undefined})
+                let squareObj:Square = {x:i,y:j,cookie:intialBoard.length,piece:undefined}
+                intialBoard.push(squareObj);
             }
         }
-        let pieces = gameState.currentBoardState;
-        for(let i=0;i<pieces.length;i++){
-            let tileIdx = (pieces[i].posX-1)*8 + pieces[i].posY-1
-            intialBoard[tileIdx] = {x:pieces[i].posX,y:pieces[i].posY,cookie:tileIdx,piece:pieces[i]}
-        }
+        
         
         return intialBoard;
     }
@@ -36,25 +33,46 @@ export default function ChessBoard():JSX.Element{
     const {gameState,setGameState} = useContext(GameContext);
     let selectedPiece = useRef<number|null>(null);
     
-    let [board,setBoard] = useState<Square[]>(intialBoardSetup());
-    
+    let [board,setBoard] = useState<Square[]>(intialBoardSetup);//shouldnt call the function, react calls the function for us. Calling it will cause it to be called in every re render
+    useEffect(()=>{
+        let newBoard = intialBoardSetup();
+        let pieces = gameState.currentBoardState;
+        for(let i=0;i<pieces.length;i++){
+            let tileIdx = (pieces[i].posX-1)*8 + pieces[i].posY-1
+            let squareObj:Square = {x:pieces[i].posX,y:pieces[i].posY,cookie:tileIdx,piece:pieces[i]}
+            newBoard[tileIdx] = squareObj;
+        }
+
+        console.log(newBoard);
+        setBoard(newBoard);
+    },[gameState.currentBoardState])
     function handleClick(e:MouseEvent,key:number){
-        if(selectedPiece.current!== null){
-            let newBoard = [...board]
-            let FromTile = newBoard[selectedPiece.current];
-            let ToTile = newBoard[key]; 
-            ToTile.piece = FromTile.piece;
-            FromTile.piece = undefined;
-            console.log(newBoard)
+        let player = gameState.players[gameState.determinePlayer()];//get the player whose turn it is 
+        
+        if(selectedPiece.current!== null){//if there is a selected piece
+            let sPiece = board[selectedPiece.current].piece;
+            let newGameState = cloneGame(gameState);
+            
+            let foundPiece = newGameState.currentBoardState.find((piece:Piece)=>piece.posX===sPiece?.posX && piece.posY===sPiece?.posY)
+            if(foundPiece === undefined){return}
+            foundPiece.posX = board[key].x;
+            foundPiece.posY = board[key].y;
+            console.log(sPiece,newGameState,foundPiece,board[key]);
+            setGameState(newGameState);
             selectedPiece.current = null;
-            setBoard(newBoard)
             return 
 
         }
         //board[key] space we click, selectedPiece space we clicked
-        if(selectedPiece.current === null&&board[key].piece !== null){
-            selectedPiece.current = key
-            console.log(selectedPiece)
+        if(selectedPiece.current === null&&board[key].piece !== null){//if there is no selected piece and we have clicked a piece
+            if(board[key].piece?.color === player.color){//do they match our color 
+                selectedPiece.current = key;
+                
+            }
+            else{
+                console.log("Not your piece")
+            }
+            
             return
         }
         
