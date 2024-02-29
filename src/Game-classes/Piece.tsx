@@ -1,3 +1,5 @@
+import { Action, MarchAction, MoveAction } from "./Actions";
+
 /*
 Game pieces file
 */
@@ -6,11 +8,17 @@ class Piece{
     posX:number;
     posY:number;
     imageLink:string|undefined;
+    moveActions:MoveAction[]
     constructor(color:Color,posX:number,posY:number){
         this.color = color;
         this.posX = posX;
         this.posY = posY;
         this.imageLink = undefined;
+        this.moveActions = [];
+    }
+    move(currentBoardState:Piece[],newPosX:number,newPosY:number){
+        let boardStates = this.moveActions.forEach(action => {action.execute(currentBoardState,newPosX,newPosY)});
+        
     }
       
 }
@@ -26,6 +34,7 @@ class Pawn extends Piece{
     constructor(color:Color,posX:number,posY:number){
         super(color,posX,posY);
         this.imageLink = (color) ? "w_pawn.png":"b_pawn.png" 
+        this.moveActions = [new MarchAction(this)]
     }
 }
 
