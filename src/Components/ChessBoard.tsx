@@ -6,7 +6,6 @@ import { useContext } from "react";
 import GameContext from "../Game-classes/GameContext";
 import { cloneGame } from "../Game-classes/Game";
 import { Piece } from "../Game-classes/Piece";
-import { MarchAction } from "../Game-classes/Actions";
 
 interface Square{
     x:number,
@@ -44,7 +43,7 @@ export default function ChessBoard():JSX.Element{
             newBoard[tileIdx] = squareObj;
         }
         setBoard(newBoard);
-    },[gameState.currentBoardState])
+    },[gameState])
     function handleClick(e:MouseEvent,key:number){
         let player = gameState.players[gameState.determinePlayer()];//get the player whose turn it is 
         
@@ -53,13 +52,12 @@ export default function ChessBoard():JSX.Element{
             let sPiece = board[selectedPiece.current].piece;
             if(!sPiece){return}
             let newGameState = cloneGame(gameState);
-            let foundPiece = newGameState.currentBoardState.find((piece:Piece)=>piece.posX===sPiece?.posX && piece.posY===sPiece?.posY)
+            let foundPiece = gameState.currentBoardState.find((piece:Piece)=>piece.posX===sPiece?.posX && piece.posY===sPiece?.posY)
             if(!foundPiece){return}
-            foundPiece.posX = board[key].x;
-            foundPiece.posY = board[key].y;
-            console.log()
-            if(sPiece.constructor.name==="Pawn"){sPiece.move(newGameState.currentBoardState,board[key].x,board[key].y)}
+            newGameState.currentBoardState = foundPiece.move(gameState.currentBoardState,board[key].x,board[key].y)
+            
             newGameState.turns += 1;
+           
             setGameState(newGameState);
             selectedPiece.current = null;
             return 
