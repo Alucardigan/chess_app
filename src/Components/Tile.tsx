@@ -2,7 +2,7 @@ import React, { MouseEvent, useState } from "react";
 import "./Tile.css"
 import { useContext } from "react";
 import GameContext from "../Game-classes/GameContext";
-import { Game, cloneGame } from "../Game-classes/Game";
+import { Game } from "../Game-classes/Game";
 import { Piece } from "../Game-classes/Piece";
 
 interface mouseHandlerType{

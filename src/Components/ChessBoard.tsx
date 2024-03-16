@@ -4,7 +4,7 @@ import Tile from "./Tile";
 import { WhitePlayer,BlackPlayer, Player } from "../Game-classes/Player";
 import { useContext } from "react";
 import GameContext from "../Game-classes/GameContext";
-import { cloneGame } from "../Game-classes/Game";
+import { cloneGame } from "../Game-classes/Helpers";
 import { Piece } from "../Game-classes/Piece";
 
 interface Square{
@@ -56,7 +56,7 @@ export default function ChessBoard():JSX.Element{
             if(!foundPiece){return}
             newGameState.currentBoardState = foundPiece.move(gameState.currentBoardState,board[key].x,board[key].y)
             
-            newGameState.turns += 1;
+            newGameState.tickTurn();
            
             setGameState(newGameState);
             selectedPiece.current = null;

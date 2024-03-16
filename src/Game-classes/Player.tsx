@@ -120,7 +120,7 @@ class BlackPlayer extends Player{
     }
     intialiseQueen(){
         const QueenX = 1;
-        const QueenY = 5;
+        const QueenY = 4;
         return super.intialiseQueen(QueenX,QueenY);
     }
     intialiseRooks(){
@@ -143,7 +143,7 @@ class BlackPlayer extends Player{
     }
     intialiseKing(){
         const KingX = 1;
-        const KingY = 4;
+        const KingY = 5;
         return super.intialiseKing(KingX,KingY)
     }
 }
