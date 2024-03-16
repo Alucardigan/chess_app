@@ -1,3 +1,4 @@
+
 import { Piece } from "./Piece";
 import { Color,PieceMoveType } from "./Piece";
 
@@ -43,6 +44,49 @@ export class ActionGenerator{
         }
         return actions
     }
+    static generateJumpAction(piece:Piece,currentBoardState:Piece[]){
+        let actions:MoveAction[] = []
+        if(!piece.jump){return actions}
+        for(let direction in piece.posMoves){
+            let property = piece.posMoves[direction as keyof PieceMoveType]
+            if(property.bool){
+                let calcX = piece.posX-(property.x*piece.color*2)
+                let calcY = piece.posY-(property.y*piece.color*2)
+                console.log(calcX,calcY,property.x,property.y)
+                if(Math.abs(property.x)<1){
+                    if(this.borderCheck(calcX+1,calcY)){
+                        actions.push(new MoveAction(piece,calcX+1,calcY))
+                    }
+                    if(this.borderCheck(calcX-1,calcY)){
+                        actions.push(new MoveAction(piece,calcX-1,calcY))
+                    }
+                }
+                else if(Math.abs(property.y)<1){
+                    if(this.borderCheck(calcX,calcY+1)){
+                        actions.push(new MoveAction(piece,calcX,calcY+1))
+                    }
+                    if(this.borderCheck(calcX,calcY-1)){
+                        actions.push(new MoveAction(piece,calcX,calcY-1))
+                    }
+                }
+            }
+            
+        }
+        return actions
+    }
+    static borderCheck(x:number,y:number){
+        /*
+        Funciton to calculate if a set of coords goes over the border limits 
+        */
+        if(x>8||x<1){
+            return false;
+        }
+        if(y>8||y<1){
+            return false;
+        }
+        return true;
+
+    }
 }
 export class KillAction extends Action{
     pieceToKill:Piece
@@ -73,7 +117,7 @@ export class MoveAction extends Action{
         //if kill action
         
         let bkillPieceRef = currentBoardState.find((bPiece)=>this.newPosX === bPiece.posX && this.newPosY===bPiece.posY)
-        console.log(currentBoardState,this.piece,this.newPosX,this.newPosY,bkillPieceRef)
+        
         if(bkillPieceRef){
             if(bkillPieceRef.color === this.piece.color){return currentBoardState}
             let kill = new KillAction(this.piece,bkillPieceRef);

@@ -22,7 +22,6 @@ export interface PieceMoveType{
     bot_right: DirectionMap,
     right: DirectionMap,
     left: DirectionMap,
-    flank: DirectionMap
 }
 class Piece{
     color: Color;
@@ -32,6 +31,7 @@ class Piece{
     moveActions:MoveAction[];
     moveLimit:number
     posMoves:PieceMoveType
+    jump: boolean
     constructor(color:Color,posX:number,posY:number){
         this.color = color;
         this.posX = posX;
@@ -48,8 +48,8 @@ class Piece{
             bot_right:new DirectionMap(false,-1,1),
             right: new DirectionMap(false,0,1),
             left: new DirectionMap(false,0,-1),
-            flank:new DirectionMap(false,3,1)
         }
+        this.jump = false;
     }
     move(currentBoardState:Piece[],newPosX:number,newPosY:number){
         let actions  = this.generateMoveLogic(currentBoardState);
@@ -94,7 +94,15 @@ class Pawn extends Piece{
     }
     generateMoveLogic(currentBoardState: Piece[]){
         let actions = super.generateMoveLogic(currentBoardState);
-        
+        for(let i = actions.length-1;i>=0;i--){
+            if(Math.abs(actions[i].newPosY - this.posY)>1){
+                actions.splice(i,1)//remove from list if you are trying to do 2 step diagonal
+            }
+            else if(Math.abs(actions[i].newPosY - this.posY)>0){
+                let fPiece = currentBoardState.find((piece)=>piece.posX===actions[i].newPosX&&piece.posY===actions[i].newPosY)
+                if(!fPiece){actions.splice(i,1)}//remove diagonals if there is no piece
+            }
+        }
         return actions;
     }
 }
@@ -118,7 +126,14 @@ class Knight extends Piece{
     constructor(color:Color,posX:number,posY:number){
         super(color,posX,posY);
         this.imageLink = (color>0) ? "w_knight.png":"b_knight.png" 
-        this.posMoves.flank.bool = true;
+        this.posMoves.forward.bool = true;
+        this.posMoves.backward.bool = true;
+        this.posMoves.left.bool = true;
+        this.posMoves.right.bool = true;
+        this.jump = true
+    }
+    generateMoveLogic(currentBoardState: Piece[]): MoveAction[] {
+        return ActionGenerator.generateJumpAction(this,currentBoardState);
     }
 }
 class Bishop extends Piece{
