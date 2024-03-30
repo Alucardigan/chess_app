@@ -1,13 +1,5 @@
+import { useNavigate } from "react-router-dom"
 import { io } from "socket.io-client"
+import React, { createContext, useEffect, useState } from "react";
+import { Socket } from "socket.io";
 
-const socket = io('http://localhost:3000')
-export function Client(){
-
-}
-export function createRoom(){
-    console.log("create a Room")
-    socket.emit('create-room')
-}
-socket.on('room-created',(roomId)=>{
-
-});

@@ -2,7 +2,7 @@ import { BlackPlayer, Player, WhitePlayer } from "./Player";
 import { useContext } from "react";
 import GameContext from "./GameContext";
 import { King, Piece } from "./Piece";
-import { cloneBoard } from "./Helpers";
+import { cloneBoard, cloneGame } from "./Helpers";
 
 
 export class Game{
@@ -21,20 +21,28 @@ export class Game{
         let playerBlack = new BlackPlayer();
         return [playerWhite,playerBlack];
     }
-    determinePlayer():number{
-        return (this.turns%2); 
-    }
+    
     intialiseBoardState(){
         let board:Piece[] = [];
         this.players.forEach((player)=>board = board.concat(player.pieces));
         return board;
     }
-    tickTurn(){
-        this.turns += 1;
-        
-        if(this.checkIfMate(this.currentBoardState)){console.log("King is mated")}
+    
+}
+    
+export class gameFunction{
+    static determinePlayer(game:Game):number{
+        return (game.turns%2); 
     }
-    checkIfMate(currentBoardState:Piece[]){
+    static tickTurn(game:Game){
+        game.turns += 1;
+        
+        if(this.checkIfMate(game.currentBoardState)){console.log("King is mated")}
+        const gameClone = cloneGame(game)
+        console.log(gameClone)
+        return gameClone 
+    }
+    static checkIfMate(currentBoardState:Piece[]){
     /*
     Function to check if a king is currently in mate 
     */
@@ -67,7 +75,7 @@ export class Game{
         }
         return false;
     }
-    checkIfBlock(currentBoardState:Piece[],checkedKing:King){
+    static checkIfBlock(currentBoardState:Piece[],checkedKing:King){
     /*
     Function that checks if a piece can block mate. 
     returns true if a piece can block else false
@@ -88,5 +96,3 @@ export class Game{
         return false;
     }
 }
-    
-

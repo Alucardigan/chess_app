@@ -8,19 +8,23 @@ import { ChakraBaseProvider, Switch } from '@chakra-ui/react';
 import { ChessBoardPage } from './Pages/ChessboardPage';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { HomePage } from './Pages/HomePage';
+import { io } from 'socket.io-client';
+import SocketContext from './Components/SocketContext';
 
 
 
 function App() {
-  let [gameState,setGameState] = useState(new Game());
+  const [socket,setSocket] = useState(io())
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/chessboard/:roomId" element={<ChessBoardPage/>}/>
-        <Route index element={<HomePage/>}/>
-      </Routes>
+    <SocketContext.Provider value={{socket,setSocket}}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/chessboard/:roomId" element={<ChessBoardPage/>}/>
+          <Route index element={<HomePage/>}/>
+        </Routes>
 
-    </BrowserRouter>
+      </BrowserRouter>
+    </SocketContext.Provider>
     
     
   );

@@ -16,12 +16,12 @@ export default function Tile({TileX,TileY,cookie,piece=undefined,mouseHandler}:{
     
     if((TileX+TileY)%2){
         
-        return <div id="Tile"  onMouseDown={(e)=>mouseHandler(e,cookie)} className="black-tile" style= {{backgroundImage:`url(${piece?.imageLink})`}}>
+        return <div id="Tile"  onMouseDown={(e)=>mouseHandler(e,cookie)} className="black-tile" style= {{backgroundImage:`url(/${piece?.imageLink})`}}>
         
         </div>
     }
     else{
-        return <div id="Tile"  onMouseDown={(e)=>mouseHandler(e,cookie)}  className="white-tile" style= {{backgroundImage:`url(${piece?.imageLink})`}}>
+        return <div id="Tile"  onMouseDown={(e)=>mouseHandler(e,cookie)}  className="white-tile" style= {{backgroundImage:`url(/${piece?.imageLink})`}}>
            
         </div>
     }

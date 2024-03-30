@@ -6,6 +6,8 @@ import { useContext } from "react";
 import GameContext from "../Game-classes/GameContext";
 import { cloneGame } from "../Game-classes/Helpers";
 import { Piece } from "../Game-classes/Piece";
+import SocketContext from "./SocketContext";
+import { Game, gameFunction } from "../Game-classes/Game";
 
 interface Square{
     x:number,
@@ -15,7 +17,20 @@ interface Square{
 }
 
 export default function ChessBoard():JSX.Element{
-    function intialBoardSetup(){
+    //sockets
+    const {socket,setSocket} = useContext(SocketContext);
+    useEffect(()=>{
+        const receiveGame =(newGame:Game)=>{
+            console.log("Game received")
+            console.log(newGame)
+            let newGameClone= cloneGame(newGame)
+            setGameState(newGameClone)
+        }
+        socket.on('receiveGame',receiveGame)//change gamestate when gettign a game back
+        return ()=>{socket.off()}//removing listener to stop spam
+    },[socket])    
+
+    function intialBoardSetup(){//function to setup our board
         console.log('setup')
         const BOARD_SIZE = 8
         let intialBoard = []
@@ -45,10 +60,10 @@ export default function ChessBoard():JSX.Element{
         setBoard(newBoard);
     },[gameState])
     function handleClick(e:MouseEvent,key:number){
-        let player = gameState.players[gameState.determinePlayer()];//get the player whose turn it is 
+        console.log(gameState)
+        let player = gameState.players[gameFunction.determinePlayer(gameState)];//get the player whose turn it is 
         
         if(selectedPiece.current!== null){//if there is a selected piece
-            
             let sPiece = board[selectedPiece.current].piece;
             if(!sPiece){return}
             let newGameState = cloneGame(gameState);
@@ -56,12 +71,10 @@ export default function ChessBoard():JSX.Element{
             if(!foundPiece){return}
             newGameState.currentBoardState = foundPiece.move(gameState.currentBoardState,board[key].x,board[key].y)
             
-            newGameState.tickTurn();
-           
-            setGameState(newGameState);
+            newGameState = gameFunction.tickTurn(newGameState)
+            socket.emit('sendGame',newGameState)
             selectedPiece.current = null;
             return 
-
         }
         //board[key] space we click, selectedPiece space we clicked
         if(selectedPiece.current === null&&board[key].piece !== null){//if there is no selected piece and we have clicked a piece
