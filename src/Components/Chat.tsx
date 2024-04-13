@@ -44,3 +44,8 @@ export default function Chat(){
         </div>
     )
 }
+export interface MessageRequest{
+    roomId: number,
+    msg: string
+    
+}
