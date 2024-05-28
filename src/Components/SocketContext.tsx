@@ -7,6 +7,6 @@ interface SocketContextValue {
     socket: Socket<DefaultEventsMap, DefaultEventsMap>;
     setSocket: any;
 }
-const SocketContext = createContext<SocketContextValue>({socket: io(),setSocket: ()=> {}});
+const SocketContext = createContext<SocketContextValue>({socket: io('http://localhost:8080'),setSocket: ()=> {}});
 
 export default SocketContext;

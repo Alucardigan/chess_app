@@ -10,7 +10,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.80",
+    "@types/node": "^20.12.12",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "express": "^4.18.3",
@@ -18,22 +18,25 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
-    "react-scripts": "5.0.1",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "test": "exit 0",
+    "eject": "react-scripts eject",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
+  "type":"module",
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
   },
   "browserslist": {
@@ -47,5 +50,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.0",
+    "vite": "^5.2.11"
   }
 }

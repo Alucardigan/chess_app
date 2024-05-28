@@ -6,33 +6,25 @@ import { fileURLToPath } from 'url';
 import { room } from './room';
 
 
-const app = express();
-const server = createServer(app);
+
+const server = createServer();
 const io = new Server(server, {
   cors: {
-    origin: "https://localhost:3000",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"]
   }
 });
 
-const generateRoomId = ()=>{
-    return Math.floor(Math.random()*1000000)
-}
-const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
-const __dirname = path.dirname(__filename); // get the name of the directory
-
-app.use(express.static(path.join(__dirname,'../build')))
-
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
-
-
-server.listen(3000, () => {
-  console.log('server running at http://localhost:3000');
+const PORT = 8080
+server.listen(PORT, () => {
+  console.log('server running at http://localhost:8080');
 });
 
 let rooms = new Map<string,string[]>()
+
+const generateRoomId = ()=>{
+  return Math.floor(Math.random()*1000000)
+}
 
 io.on('connection',(socket)=>{
   console.log('a user connected')
@@ -50,10 +42,15 @@ io.on('connection',(socket)=>{
     if(rooms.has(roomId)){
       let players = rooms.get(roomId)
       if(players === undefined){return}
-      players.push(socket.id)
+      if(!players.find((id)=> {id == socket.id})){
+        players.push(socket.id)
+      }
+      else{
+        console.log("Already in set ")
+      }
       rooms.set(roomId,players)
       socket.join(roomId)
-      console.log('joined room')
+      console.log('joined room',rooms)
     }
     else{
       console.log("room doesnt exist")

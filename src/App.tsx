@@ -14,7 +14,7 @@ import SocketContext from './Components/SocketContext';
 
 
 function App() {
-  const [socket,setSocket] = useState(io())
+  const [socket,setSocket] = useState(io('http://localhost:8080'))
   return (
     <SocketContext.Provider value={{socket,setSocket}}>
       <BrowserRouter>
