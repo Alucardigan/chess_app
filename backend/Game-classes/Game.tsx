@@ -5,7 +5,7 @@ import { King, Piece } from "./Piece";
 import { cloneBoard, cloneGame } from "./Helpers";
 
 
-export class Game{
+export default class Game{
     turns: number;
     players: Player[]
     currentBoardState: Piece[]
@@ -46,7 +46,7 @@ export class gameFunction{
     /*
     Function to check if a king is currently in mate 
     */
-        let kingPieces=[] 
+        let kingPieces:Piece[]=[] 
         kingPieces = currentBoardState.filter((piece)=>piece.pieceTypeID===6)
         for(let i = 0;i<kingPieces.length;i++){
             let kpiece = kingPieces[i] as  King; 
@@ -94,5 +94,9 @@ export class gameFunction{
             }
         }
         return false;
+    }
+    static findPiece(pieceX:number,pieceY:number,currentBoardState:Piece[]){
+        const foundPiece =  currentBoardState.find((curPiece)=>curPiece.posX === pieceX && curPiece.posY=== pieceY)
+        return foundPiece;
     }
 }

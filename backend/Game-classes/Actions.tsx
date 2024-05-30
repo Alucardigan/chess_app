@@ -25,7 +25,7 @@ export class ActionGenerator{
         else{this.instance+=1 }
     }
     static generateMoveAction(piece:Piece,currentBoardState:Piece[]){
-        let actions = []
+        let actions:MoveAction[] = []
         //generate in all directions then prune based off piece?
         for(let direction in piece.posMoves){//generate a move action in each direction for each square it can move to
             for(let i =1; i<= piece.moveLimit;i++){

@@ -18,7 +18,7 @@ export function cloneGame(gameToClone: Game){
 }
 
 export function cloneBoard(boardToClone:Piece[]){
-    let newBoard = []
+    let newBoard:Piece[] = []
     for(let i = 0;i<boardToClone.length;i++){
         let newPiece = structuredClone(boardToClone[i])
         Object.setPrototypeOf(newPiece,Object.getPrototypeOf(boardToClone[i]))

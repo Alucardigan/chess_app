@@ -1,35 +1,47 @@
 import React, { useEffect, useState,MouseEvent, useRef, useMemo} from "react";
 import './ChessBoard.css'
 import Tile from "./Tile";
-import { WhitePlayer,BlackPlayer, Player } from "../Game-classes/Player";
 import { useContext } from "react";
-import GameContext from "../Game-classes/GameContext";
-import { cloneGame } from "../Game-classes/Helpers";
-import { Piece } from "../Game-classes/Piece";
 import SocketContext from "./SocketContext";
-import { Game, gameFunction } from "../Game-classes/Game";
+import {GameFormat,PieceFormat,MoveRequest} from '../../shared/gameRequests'
 
 interface Square{
     x:number,
     y:number,
     cookie:number,
-    piece: Piece|undefined;
+    piece:string|undefined
+}
+function cloneBoard(board:[]){
+    let newBoard:Square[] = []
+    for(let i = 0; i < board.length;i++){
+        newBoard.push(board[i])
+    }
+    return newBoard
 }
 
+
 export default function ChessBoard():JSX.Element{
-    //sockets
+    //socket listener that updates game
     const {socket,setSocket} = useContext(SocketContext);
+    //board setup
+    let [board,setBoard] = useState<Square[]>(intialBoardSetup);//shouldnt call the function, react calls the function for us. Calling it will cause it to be called in every re render
+
+    //socket listener
     useEffect(()=>{
-        const receiveGame =(newGame:Game)=>{
-            console.log("Game received")
-            console.log(newGame)
-            let newGameClone= cloneGame(newGame)
-            setGameState(newGameClone)
+        const receiveGame =(newGame:GameFormat)=>{
+            let newBoard = intialBoardSetup()
+            for(let i =0; i< newGame.pieces.length;i++){
+                let piece:PieceFormat = newGame.pieces[i]
+                let squareIdx = newBoard.findIndex((s)=>{return s.x === piece.positionX && s.y === piece.positionY})//if you use curly braces, YOU NEED TO RETURN 
+                newBoard[squareIdx].piece = piece.fileName;
+            }
+            setBoard(newBoard)//re render the board
         }
         socket.on('receiveGame',receiveGame)//change gamestate when gettign a game back
         return ()=>{socket.off()}//removing listener to stop spam
     },[socket])    
-
+    
+    //intial board setup 
     function intialBoardSetup(){//function to setup our board
         console.log('setup')
         const BOARD_SIZE = 8
@@ -40,53 +52,23 @@ export default function ChessBoard():JSX.Element{
                 intialBoard.push(squareObj);
             }
         }
-        
-        
         return intialBoard;
     }
     
-    const {gameState,setGameState} = useContext(GameContext);
-    let selectedPiece = useRef<number|null>(null);
-    
-    let [board,setBoard] = useState<Square[]>(intialBoardSetup);//shouldnt call the function, react calls the function for us. Calling it will cause it to be called in every re render
-    useEffect(()=>{
-        let newBoard = intialBoardSetup();
-        let pieces = gameState.currentBoardState;
-        for(let i=0;i<pieces.length;i++){
-            let tileIdx = (pieces[i].posX-1)*8 + pieces[i].posY-1
-            let squareObj:Square = {x:pieces[i].posX,y:pieces[i].posY,cookie:tileIdx,piece:pieces[i]}
-            newBoard[tileIdx] = squareObj;
-        }
-        setBoard(newBoard);
-    },[gameState])
-    function handleClick(e:MouseEvent,key:number){
-        console.log(gameState)
-        let player = gameState.players[gameFunction.determinePlayer(gameState)];//get the player whose turn it is 
-        
+    let selectedPiece = useRef<number|null>(null);//null is used here as it is explicit and clear unlike undefined 
+    function handleClick(e:MouseEvent,key:number){ 
+        console.log(selectedPiece,key)
         if(selectedPiece.current!== null){//if there is a selected piece
-            let sPiece = board[selectedPiece.current].piece;
-            if(!sPiece){return}
-            let newGameState = cloneGame(gameState);
-            let foundPiece = gameState.currentBoardState.find((piece:Piece)=>piece.posX===sPiece?.posX && piece.posY===sPiece?.posY)
-            if(!foundPiece){return}
-            newGameState.currentBoardState = foundPiece.move(gameState.currentBoardState,board[key].x,board[key].y)
-            
-            newGameState = gameFunction.tickTurn(newGameState)
-            socket.emit('sendGame',newGameState)
-            selectedPiece.current = null;
+            let mr:MoveRequest = {pieceX: board[selectedPiece.current].x,pieceY:board[selectedPiece.current].y,newX:board[key].x,newY:board[key].y}
+            console.log('Sending move ')
+            socket.emit('moveRequest',mr)
+            selectedPiece.current = null
             return 
         }
         //board[key] space we click, selectedPiece space we clicked
-        if(selectedPiece.current === null&&board[key].piece !== null){//if there is no selected piece and we have clicked a piece
-            if(board[key].piece?.color === player.color){//do they match our color 
-                selectedPiece.current = key;
-                
-            }
-            else{
-                console.log("Not your piece")
-            }
-            
-            return
+        if(selectedPiece.current === null&&board[key].piece !== undefined){//if there is no selected piece and we have clicked a piece 
+            selectedPiece.current = key;
+            console.log(selectedPiece,key)
         }
         
     }

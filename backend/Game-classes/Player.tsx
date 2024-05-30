@@ -11,7 +11,7 @@ class Player{
         
     };
     intialisePawns(PawnRow:number,PawnColumnStart:number,PawnColumnEnd:number){
-        let pawnArray = []
+        let pawnArray:Pawn[] = []
         for(let i = PawnColumnStart; i <=PawnColumnEnd;i++){
             let pawn = new Pawn(this.color,PawnRow,i);          
             pawnArray.push(pawn);
@@ -22,21 +22,21 @@ class Player{
         return [new Queen((this.color),QueenX,QueenY)]
     }
     intialiseRooks(RookX:number,RookY:number[]){
-        let RookArray  = []
+        let RookArray:Rook[]  = []
         for(let i = 0;i<RookY.length;i++){
             RookArray.push(new Rook(this.color,RookX,RookY[i]))
         }
         return RookArray
     }
     intialiseKnights(KnightX:number,KnightY:number[]){
-        let KnightArray  = []
+        let KnightArray:Knight[]  = []
         for(let i = 0;i<KnightY.length;i++){
             KnightArray.push(new Knight(this.color,KnightX,KnightY[i]))
         }
         return KnightArray
     }
     intialiseBishops(BishopX:number,BishopY:number[]){
-        let BishopArray = []
+        let BishopArray:Bishop[] = []
         for(let i = 0;i<BishopY.length;i++){
             BishopArray.push(new Bishop(this.color,BishopX,BishopY[i]))
         }

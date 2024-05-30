@@ -95,7 +95,7 @@ class Pawn extends Piece{
         return newBoardState
     }
     generateMoveLogic(currentBoardState: Piece[]){
-        let actions = super.generateMoveLogic(currentBoardState);
+        let actions:MoveAction[] = super.generateMoveLogic(currentBoardState);
         for(let i = actions.length-1;i>=0;i--){
             let fPiece = currentBoardState.find((piece)=>piece.posX===actions[i].newPosX&&piece.posY===actions[i].newPosY)
             if(Math.abs(actions[i].newPosY - this.posY)>1){
