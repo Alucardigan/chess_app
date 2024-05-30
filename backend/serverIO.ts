@@ -32,7 +32,7 @@ io.on('connection',(socket)=>{
   socket.on('create-room',()=>{
       
       const roomID = generateRoomId().toString()
-      rooms.set(roomID, {roomId:roomID,players:[socket.id],game:undefined})
+      rooms.set(roomID, {roomId:roomID,players:[socket.id],game:undefined,messages:[]})
       console.log('room created',roomID)
       socket.emit('room-created',roomID)
   })
@@ -42,7 +42,8 @@ io.on('connection',(socket)=>{
     if(rooms.has(roomId)){
       let players = rooms.get(roomId)?.players
       if(players === undefined){return}
-      if(!players.find((id)=> {id == socket.id})){
+      console.log(players)
+      if(!players.find((id)=> id === socket.id)){
         players.push(socket.id)
       }
       else{
@@ -152,4 +153,5 @@ export interface roomFormat{
   roomId:string,
   players:string[],
   game:undefined|Game
+  messages: string[]
 }
