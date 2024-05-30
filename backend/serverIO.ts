@@ -1,12 +1,9 @@
-import express from 'express';
 import { createServer } from 'node:http';
 import {Server} from 'socket.io'
-import path from 'path'
-import { fileURLToPath } from 'url';
-import { room } from './room';
 import Game, { gameFunction } from './Game-classes/Game'
 import {GameFormat,PieceFormat,MoveRequest,exportToGF}  from '../shared/gameRequests'
-import { MoveAction } from './Game-classes/Actions';
+
+
 
 
 
@@ -102,7 +99,32 @@ io.on('connection',(socket)=>{
         console.log('ERROR: piece not found')
         return 
       }
+      //is it the piece's turn to move?
+      const colorEnum = gameFunction.determinePlayer(game)
+      console.log(colorEnum,pieceToMove.color)
+      if(colorEnum!== pieceToMove.color){
+        console.log('ERROR: WRONG PIECE')
+        return 
+      }
       game.currentBoardState = pieceToMove.move(game.currentBoardState,mr.newX,mr.newY)
+      const friendlyKing = game.currentBoardState.find((piece)=>piece.pieceTypeID===6 && piece.color===pieceToMove.color)
+      const enemyKing = game.currentBoardState.find((piece)=>piece.pieceTypeID===6 && piece.color !== pieceToMove.color)
+      console.log(enemyKing,friendlyKing)
+      if(!friendlyKing || !enemyKing){
+        console.log("ERROR: KING MISSING")
+        return
+      }
+      const friendlyCheck = gameFunction.checkInCheck(game.currentBoardState,friendlyKing)
+      if (friendlyCheck!= false){
+        console.log("ERROR: in check or cant find king")
+        return 
+      }
+      //game resolution stage 
+      game.turns += 1 
+      if(gameFunction.checkIfMate(game.currentBoardState,enemyKing)){
+        console.log("CHECKMATE")
+        game.checkMate = enemyKing.color
+      }
       let gf = exportToGF(game)
       console.log(gf)
       io.to(`${roomId}`).emit('receiveGame',exportToGF(game))

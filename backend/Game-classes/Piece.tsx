@@ -1,4 +1,5 @@
 import { Action, ActionGenerator, MoveAction } from "./Actions";
+import { gameFunction } from "./Game";
 
 /*
 Game pieces file
@@ -197,24 +198,12 @@ class King extends Piece{
         this.pieceTypeID = 6;
     }
 
-    checkInCheck(currentBoardState:Piece[],curX:number=this.posX,curY:number=this.posY,){
-        for(let i = 0;i<currentBoardState.length;i++){
-            let piece = currentBoardState[i]
-            if(piece.color!==this.color && this.pieceTypeID!==piece.pieceTypeID){
-                let actions = piece.generateMoveLogic(currentBoardState);
-                for(let j = 0; j<actions.length;j++){
-                    if(actions[j].newPosX===curX && actions[j].newPosY===curY){
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
+    
     generateMoveLogic(currentBoardState: Piece[]): MoveAction[] {
         let actions = super.generateMoveLogic(currentBoardState);
         for(let i = actions.length-1;i>=0;i--){
-            if(this.checkInCheck(currentBoardState,actions[i].newPosX,actions[i].newPosY)){
+            const newKing = new King(this.color,actions[i].newPosX,actions[i].newPosY)//clone a new king with new position
+            if(gameFunction.checkInCheck(currentBoardState,newKing)){
                 actions.splice(i,1);//remove the action if it leads you to check
             }
         }

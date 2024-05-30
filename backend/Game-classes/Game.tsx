@@ -1,20 +1,22 @@
 import { BlackPlayer, Player, WhitePlayer } from "./Player";
 import { useContext } from "react";
 import GameContext from "./GameContext";
-import { King, Piece } from "./Piece";
+import { Color, King, Piece } from "./Piece";
 import { cloneBoard, cloneGame } from "./Helpers";
 
 
 export default class Game{
     turns: number;
     players: Player[]
-    currentBoardState: Piece[]
+    currentBoardState: Piece[]//TODO: I think a better data structure is needed
     selectedPiece: Piece|null;
+    checkMate:Color
     constructor(){
-        this.turns = 0;
+        this.turns = 0
         this.players = this.intialisePlayers();
         this.currentBoardState = this.intialiseBoardState();
         this.selectedPiece = null;
+        this.checkMate = Color.UNASSIGNED;
     }
     intialisePlayers():Player[]{
         let playerWhite = new WhitePlayer();
@@ -31,51 +33,54 @@ export default class Game{
 }
     
 export class gameFunction{
-    static determinePlayer(game:Game):number{
-        return (game.turns%2); 
+    //TODO: REFACTOR ALL OF THIS
+    static determinePlayer(game:Game):Color{
+        const colorNum = (game.turns%2);
+        if(colorNum){
+            return Color.BLACK
+        } 
+        return Color.WHITE
     }
-    static tickTurn(game:Game){
-        game.turns += 1;
-        
-        if(this.checkIfMate(game.currentBoardState)){console.log("King is mated")}
-        const gameClone = cloneGame(game)
-        console.log(gameClone)
-        return gameClone 
-    }
-    static checkIfMate(currentBoardState:Piece[]){
-    /*
-    Function to check if a king is currently in mate 
-    */
-        let kingPieces:Piece[]=[] 
-        kingPieces = currentBoardState.filter((piece)=>piece.pieceTypeID===6)
-        for(let i = 0;i<kingPieces.length;i++){
-            let kpiece = kingPieces[i] as  King; 
-            console.log(kpiece.checkInCheck(currentBoardState))
-            if(kpiece.checkInCheck(currentBoardState)){
-                let actions = kpiece.generateMoveLogic(currentBoardState);
-                console.log(actions)
-                let canBlock = this.checkIfBlock(currentBoardState,kpiece)
-                console.log(canBlock)
-                if(!canBlock){
-                    for(let j =0;j<actions.length;j++){
-                        let nonRefBoard = cloneBoard(currentBoardState)
-                        let resultingBoard = actions[j].execute(nonRefBoard);
-                        let nKingPiece = resultingBoard.find((piece)=>piece.pieceTypeID===6&&piece.color===kpiece.color)
-                        if(!nKingPiece){return false}
-                        let newKingPiece = nKingPiece as King;//declaring as unknown then converting
-                        console.log(newKingPiece,resultingBoard)
-                        if(!newKingPiece.checkInCheck(resultingBoard)){
-                            console.log(actions[j])
-                            return false;
-                        }
+    
+    static checkInCheck(currentBoardState:Piece[],kpiece:Piece){
+        for(let i = 0;i<currentBoardState.length;i++){
+            let piece = currentBoardState[i]
+            if(piece.color!==kpiece.color && kpiece.pieceTypeID!==piece.pieceTypeID){
+                let actions = piece.generateMoveLogic(currentBoardState);
+                for(let j = 0; j<actions.length;j++){
+                    if(actions[j].newPosX===kpiece.posX && actions[j].newPosY===kpiece.posY){
+                        return true;
                     }
-                    return true;//cant block and not move to a position that leads to not checks
                 }
-            };
+            }
         }
         return false;
     }
-    static checkIfBlock(currentBoardState:Piece[],checkedKing:King){
+    static checkIfMate(currentBoardState:Piece[],kpiece:Piece){
+    /*
+    Function to check if a king is currently in mate 
+    */
+        if(this.checkInCheck(currentBoardState,kpiece)){
+            let actions = kpiece.generateMoveLogic(currentBoardState);
+            let canBlock = this.checkIfBlock(currentBoardState,kpiece)
+            if(!canBlock){
+                for(let j =0;j<actions.length;j++){
+                    let nonRefBoard = cloneBoard(currentBoardState)
+                    let resultingBoard = actions[j].execute(nonRefBoard);
+                    let nKingPiece = resultingBoard.find((piece)=>piece.pieceTypeID===6&&piece.color===kpiece.color)
+                    if(!nKingPiece){return false}
+                    let newKingPiece = nKingPiece as King;//declaring as unknown then converting
+                    if(!this.checkInCheck(resultingBoard,newKingPiece)){
+                        return false;
+                    }
+                }
+                return true;//cant block and not move to a position that leads to not checks
+            }
+        };
+        console.log("NOT IN CHECK")
+        return false;
+    }
+    static checkIfBlock(currentBoardState:Piece[],checkedKing:Piece){
     /*
     Function that checks if a piece can block mate. 
     returns true if a piece can block else false
@@ -87,7 +92,7 @@ export class gameFunction{
                 for(let j =0;j<actions.length;j++){
                     let nonRefBoard = cloneBoard(currentBoardState)
                     let resultingBoard = actions[j].execute(nonRefBoard);
-                    if(!checkedKing.checkInCheck(resultingBoard)){
+                    if(!this.checkInCheck(resultingBoard,checkedKing)){
                         return true;
                     }
                 }
