@@ -19,7 +19,6 @@ function cloneBoard(board:[]){
     return newBoard
 }
 
-
 export default function ChessBoard():JSX.Element{
     //socket listener that updates game
     const {socket,setSocket} = useContext(SocketContext);
@@ -32,7 +31,12 @@ export default function ChessBoard():JSX.Element{
             let newBoard = intialBoardSetup()
             for(let i =0; i< newGame.pieces.length;i++){
                 let piece:PieceFormat = newGame.pieces[i]
-                let squareIdx = newBoard.findIndex((s)=>{return s.x === piece.positionX && s.y === piece.positionY})//if you use curly braces, YOU NEED TO RETURN 
+                console.log(piece.positionX,piece.positionY,piece.fileName)
+                piece.positionX = -piece.positionX + 9
+                piece.positionY = -piece.positionY +9
+                console.log(piece.positionX,piece.positionY,newBoard)
+                let squareIdx = newBoard.findIndex((s)=>{return (s.x === piece.positionX) && (s.y === piece.positionY)})//if you use curly braces, YOU NEED TO RETURN 
+                console.log(squareIdx)
                 newBoard[squareIdx].piece = piece.fileName;
             }
             setBoard(newBoard)//re render the board

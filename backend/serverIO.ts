@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import {Server} from 'socket.io'
+import {Server, Socket} from 'socket.io'
 import Game, { gameFunction } from './Game-classes/Game'
 import {GameFormat,PieceFormat,MoveRequest,exportToGF}  from '../shared/gameRequests'
 
@@ -25,7 +25,9 @@ let rooms = new Map<string,roomFormat>()
 const generateRoomId = ()=>{
   return Math.floor(Math.random()*1000000)
 }
-
+function reportError(socket:Socket,roomId:string, errorMsg:string){
+  socket.emit('ERROR',errorMsg)
+}
 io.on('connection',(socket)=>{
   console.log('a user connected')
   //creating a room
