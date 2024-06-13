@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import {Server, Socket} from 'socket.io'
 import Game, { gameFunction } from './Game-classes/Game'
 import {GameFormat,PieceFormat,MoveRequest,exportToGF}  from '../shared/gameRequests'
+import { Player } from './Game-classes/Player';
 
 
 
@@ -31,10 +32,12 @@ function reportError(socket:Socket,roomId:string, errorMsg:string){
 io.on('connection',(socket)=>{
   console.log('a user connected')
   //creating a room
-  socket.on('create-room',()=>{
+  socket.on('create-room',(isWhite)=>{
       
       const roomID = generateRoomId().toString()
-      rooms.set(roomID, {roomId:roomID,players:[socket.id],game:undefined,messages:[]})
+      const newPlayer:playerFormat = {socketId:socket.id,color:isWhite} 
+      const playerArray:playerFormat[] = [newPlayer]
+      rooms.set(roomID, {roomId:roomID,players:playerArray,game:undefined,messages:[]})
       console.log('room created',roomID)
       socket.emit('room-created',roomID)
   })
@@ -45,13 +48,17 @@ io.on('connection',(socket)=>{
       let players = rooms.get(roomId)?.players
       if(players === undefined){return}
       console.log(players)
-      if(!players.find((id)=> id === socket.id)){
-        players.push(socket.id)
+      let isWhite = true;
+      if(!players.find((player)=> player.socketId === socket.id)){
+        let isWhite = players[0].color ? false : true
+        players.push({socketId:socket.id, color: isWhite})
       }
       else{
+        isWhite = players.find((player)=> player.socketId === socket.id)?.color??isWhite
         console.log("Already in set ")
       }
       socket.join(roomId)
+      socket.emit('send-color',isWhite)
       console.log('joined room',rooms)
     }
     else{
@@ -72,18 +79,20 @@ io.on('connection',(socket)=>{
   })
   //chess functions 
   socket.on('startGame',()=>{
-    console.log("Got the request for game to start")
+    console.log("Got the request for game to start",socket.id)
     let roomId = findPlayer(socket.id,rooms)
     console.log(roomId,socket.id,rooms)
     let newGame = new Game();
     newGame.intialiseBoardState()
     if(roomId){
       let roomObj = rooms.get(roomId)
-      if(roomObj){
-        roomObj.game = newGame
+      if(!roomObj){
+        console.log("ERROR")
+        return
       }
+      roomObj.game = newGame
       let gf = exportToGF(newGame)
-      console.log(gf)
+      
       io.to(`${roomId}`).emit('receiveGame',exportToGF(newGame))
     }
 
@@ -142,10 +151,13 @@ io.on('connection',(socket)=>{
 //helpers
 export function findPlayer(playerId:string,rooms:Map<string,roomFormat>){
   for(let [roomId,roomObj] of rooms){
-      for(let i =0; i<=roomObj.players.length;i++){
-        if(roomObj.players[i]===playerId){
+    
+      for(let i =0; i<roomObj.players.length;i++){
+        console.log(roomObj.players,i,roomObj.players[i])
+        if(roomObj.players[i].socketId===playerId){
           return roomId;
         }
+        
       }
   }
   return 'Error'
@@ -153,7 +165,12 @@ export function findPlayer(playerId:string,rooms:Map<string,roomFormat>){
 }
 export interface roomFormat{
   roomId:string,
-  players:string[],
+  players:playerFormat[],
   game:undefined|Game
   messages: string[]
+}
+
+export interface playerFormat{
+  socketId:string,
+  color: boolean
 }

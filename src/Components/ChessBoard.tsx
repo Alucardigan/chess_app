@@ -20,8 +20,19 @@ function cloneBoard(board:[]){
 }
 
 export default function ChessBoard():JSX.Element{
+
+    
     //socket listener that updates game
     const {socket,setSocket} = useContext(SocketContext);
+    if(!socket.id){
+        console.log("ERROR")
+        return(<div>ERROR</div>)
+    }
+    const storedData = localStorage.getItem(socket.id)
+    if(!storedData){return(<div>ERROR</div>)}
+    const {isWhite} = JSON.parse(storedData)
+    console.log(isWhite)
+
     //board setup
     let [board,setBoard] = useState<Square[]>(intialBoardSetup);//shouldnt call the function, react calls the function for us. Calling it will cause it to be called in every re render
 
@@ -31,12 +42,11 @@ export default function ChessBoard():JSX.Element{
             let newBoard = intialBoardSetup()
             for(let i =0; i< newGame.pieces.length;i++){
                 let piece:PieceFormat = newGame.pieces[i]
-                console.log(piece.positionX,piece.positionY,piece.fileName)
-                piece.positionX = -piece.positionX + 9
-                piece.positionY = -piece.positionY +9
-                console.log(piece.positionX,piece.positionY,newBoard)
+                if(!isWhite){
+                    piece.positionX = -piece.positionX + 9
+                    piece.positionY = -piece.positionY +9
+                }
                 let squareIdx = newBoard.findIndex((s)=>{return (s.x === piece.positionX) && (s.y === piece.positionY)})//if you use curly braces, YOU NEED TO RETURN 
-                console.log(squareIdx)
                 newBoard[squareIdx].piece = piece.fileName;
             }
             setBoard(newBoard)//re render the board
@@ -64,6 +74,10 @@ export default function ChessBoard():JSX.Element{
         console.log(selectedPiece,key)
         if(selectedPiece.current!== null){//if there is a selected piece
             let mr:MoveRequest = {pieceX: board[selectedPiece.current].x,pieceY:board[selectedPiece.current].y,newX:board[key].x,newY:board[key].y}
+            if(!isWhite){
+                mr = {pieceX: -board[selectedPiece.current].x+9,pieceY:-board[selectedPiece.current].y+9,newX:-board[key].x+9,newY:-board[key].y+9}
+            }
+            
             console.log('Sending move ')
             socket.emit('moveRequest',mr)
             selectedPiece.current = null

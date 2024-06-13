@@ -17,6 +17,13 @@ export function ChessBoardPage(){
     const {socket,setSocket} = useContext(SocketContext)
     let {roomId} = useParams<{roomId:string}>()
     socket.emit('join-room',roomId)
+    socket.on('send-color',(color)=>{
+        if(!socket.id){
+            console.log("ERROR socket id undefined")
+            return  
+          }
+        localStorage.setItem(socket.id,JSON.stringify({color}))
+    })
     console.log('a user joined a game') 
     return(
         <div className="ChessBoardPage">
