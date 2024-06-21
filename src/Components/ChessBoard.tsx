@@ -24,14 +24,7 @@ export default function ChessBoard():JSX.Element{
     
     //socket listener that updates game
     const {socket,setSocket} = useContext(SocketContext);
-    if(!socket.id){
-        console.log("ERROR")
-        return(<div>ERROR</div>)
-    }
-    const storedData = localStorage.getItem(socket.id)
-    if(!storedData){return(<div>ERROR</div>)}
-    const {isWhite} = JSON.parse(storedData)
-    console.log(isWhite)
+    const [isWhite,setColor] = useState(true)
 
     //board setup
     let [board,setBoard] = useState<Square[]>(intialBoardSetup);//shouldnt call the function, react calls the function for us. Calling it will cause it to be called in every re render
@@ -40,6 +33,15 @@ export default function ChessBoard():JSX.Element{
     useEffect(()=>{
         const receiveGame =(newGame:GameFormat)=>{
             let newBoard = intialBoardSetup()
+            if(socket.id){
+                console.log(localStorage.getItem(socket.id))
+                const getData = localStorage.getItem(socket.id)
+                if(getData){
+                    console.log(JSON.parse(getData).color)
+                    setColor(JSON.parse(getData).color===true)
+                }
+                
+            }
             for(let i =0; i< newGame.pieces.length;i++){
                 let piece:PieceFormat = newGame.pieces[i]
                 if(!isWhite){
@@ -74,11 +76,11 @@ export default function ChessBoard():JSX.Element{
         console.log(selectedPiece,key)
         if(selectedPiece.current!== null){//if there is a selected piece
             let mr:MoveRequest = {pieceX: board[selectedPiece.current].x,pieceY:board[selectedPiece.current].y,newX:board[key].x,newY:board[key].y}
-            if(!isWhite){
+            if(isWhite===false){
                 mr = {pieceX: -board[selectedPiece.current].x+9,pieceY:-board[selectedPiece.current].y+9,newX:-board[key].x+9,newY:-board[key].y+9}
             }
             
-            console.log('Sending move ')
+            console.log('Sending move ',isWhite)
             socket.emit('moveRequest',mr)
             selectedPiece.current = null
             return 

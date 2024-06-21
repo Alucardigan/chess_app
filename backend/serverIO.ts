@@ -44,6 +44,7 @@ io.on('connection',(socket)=>{
 
   //joining a room
   socket.on('join-room',(roomId)=>{
+    console.log(roomId)
     if(rooms.has(roomId)){
       let players = rooms.get(roomId)?.players
       if(players === undefined){return}

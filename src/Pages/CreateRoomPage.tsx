@@ -30,11 +30,6 @@ export function RoomPage(){
         console.log(roomId)
         navigate(`/chessboard/${roomId}`)
     });
-    socket.on('join-room',(roomId)=>{
-        console.log(roomId)
-        navigate(`/chessboard/${roomId}`)
-    })
-    
 
     return(
         <Box bg="gray.50" minH="100vh" display="flex" flexDirection="column" alignItems="center" justifyContent="center" p={4}>
@@ -74,7 +69,7 @@ export function RoomPage(){
             color="white"
             border="2px"
             borderColor="blue.500"
-            onClick={createRoom}
+            onClick={()=>{socket.emit('create-room',isWhite)}}
             size="md"
             gridColumn="span 1"
             mt={4}
