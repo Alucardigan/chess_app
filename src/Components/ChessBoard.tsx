@@ -24,6 +24,7 @@ export default function ChessBoard():JSX.Element{
     //socket listener that updates game
     const {socket,setSocket} = useContext(SocketContext);
     const [isWhite,setColor] = useState(true)
+    const [selectedPiece,setSelectedPiece] = useState<number>();//null is used here as it is explicit and clear unlike undefined 
 
     //board setup
     let [board,setBoard] = useState<Square[]>(intialBoardSetup);//shouldnt call the function, react calls the function for us. Calling it will cause it to be called in every re render
@@ -64,22 +65,24 @@ export default function ChessBoard():JSX.Element{
         return intialBoard;
     }
     
-    let selectedPiece = useRef<number|null>(null);//null is used here as it is explicit and clear unlike undefined 
+    
     function handleClick(e:MouseEvent,key:number){ 
         console.log(selectedPiece,key)
-        if(selectedPiece.current!== null){//if there is a selected piece
-            let mr:MoveRequest = {pieceX: board[selectedPiece.current].x,pieceY:board[selectedPiece.current].y,newX:board[key].x,newY:board[key].y}
+        if(selectedPiece){//if there is a selected piece
+            let mr:MoveRequest = {pieceX: board[selectedPiece].x,pieceY:board[selectedPiece].y,newX:board[key].x,newY:board[key].y}
             if(isWhite===false){
-                mr = {pieceX: -board[selectedPiece.current].x+9,pieceY:-board[selectedPiece.current].y+9,newX:-board[key].x+9,newY:-board[key].y+9}
+                mr = {pieceX: -board[selectedPiece].x+9,pieceY:-board[selectedPiece].y+9,newX:-board[key].x+9,newY:-board[key].y+9}
             }
             
             socket.emit('moveRequest',mr)
-            selectedPiece.current = null
+            console.log(selectedPiece)
+            setSelectedPiece(undefined)
             return 
         }
         //board[key] space we click, selectedPiece space we clicked
-        if(selectedPiece.current === null&&board[key].piece !== undefined){//if there is no selected piece and we have clicked a piece 
-            selectedPiece.current = key;
+        if(!selectedPiece &&board[key].piece !== undefined){//if there is no selected piece and we have clicked a piece 
+            console.log(key)
+            setSelectedPiece(key);
         }
         
     }
@@ -87,6 +90,6 @@ export default function ChessBoard():JSX.Element{
         
     return <div id="ChessBoard"  className="ChessBoard" >
         
-        {board.map((tileObj) => <Tile TileX={tileObj.x} TileY={tileObj.y} piece={tileObj.piece} cookie={tileObj.cookie} mouseHandler={handleClick}></Tile>)}
+        {board.map((tileObj) => <Tile TileX={tileObj.x} TileY={tileObj.y} piece={tileObj.piece} cookie={tileObj.cookie} isSelected={tileObj.cookie===selectedPiece} mouseHandler={handleClick}></Tile>)}
     </div>
 }

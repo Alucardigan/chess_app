@@ -28,3 +28,11 @@
     height: 90%;
     width: 90%;
 }
+#Tile.selected {
+    border: 2px solid red;
+    background-color: yellow;
+    display: inherit;
+    place-items: center;
+    background-repeat: no-repeat;
+    background-position: center;
+}
