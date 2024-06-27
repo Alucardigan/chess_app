@@ -3,13 +3,14 @@ import './ChessBoard.css'
 import Tile from "./Tile";
 import { useContext } from "react";
 import SocketContext from "./SocketContext";
-import {GameFormat,PieceFormat,MoveRequest} from '../../shared/gameRequests'
+import {GameFormat,PieceFormat,MoveRequest, MoveResponse} from '../../shared/gameRequests'
 
 interface Square{
     x:number,
     y:number,
     cookie:number,
     piece:string|undefined
+    isSelected: boolean
 }
 function cloneBoard(board:[]){
     let newBoard:Square[] = []
@@ -19,9 +20,7 @@ function cloneBoard(board:[]){
     return newBoard
 }
 
-export default function ChessBoard():JSX.Element{
-
-    
+export default function ChessBoard():JSX.Element{    
     //socket listener that updates game
     const {socket,setSocket} = useContext(SocketContext);
     const [isWhite,setColor] = useState(true)
@@ -31,20 +30,14 @@ export default function ChessBoard():JSX.Element{
 
     //socket listener
     useEffect(()=>{
-        const receiveGame =(newGame:GameFormat)=>{
+        const receiveGame =(moveRes:MoveResponse)=>{
+            console.log(moveRes)
+            setColor(moveRes.playerColor)
+            const newGame = moveRes.gameFormat;
             let newBoard = intialBoardSetup()
-            if(socket.id){
-                console.log(localStorage.getItem(socket.id))
-                const getData = localStorage.getItem(socket.id)
-                if(getData){
-                    console.log(JSON.parse(getData).color)
-                    setColor(JSON.parse(getData).color===true)
-                }
-                
-            }
             for(let i =0; i< newGame.pieces.length;i++){
                 let piece:PieceFormat = newGame.pieces[i]
-                if(!isWhite){
+                if(isWhite==false){
                     piece.positionX = -piece.positionX + 9
                     piece.positionY = -piece.positionY +9
                 }
@@ -55,7 +48,7 @@ export default function ChessBoard():JSX.Element{
         }
         socket.on('receiveGame',receiveGame)//change gamestate when gettign a game back
         return ()=>{socket.off()}//removing listener to stop spam
-    },[socket])    
+    },[socket,isWhite])    
     
     //intial board setup 
     function intialBoardSetup(){//function to setup our board
@@ -64,7 +57,7 @@ export default function ChessBoard():JSX.Element{
         let intialBoard = []
         for(let i=1; i <= BOARD_SIZE; i++){
             for(let j= 1; j <= BOARD_SIZE;j++){
-                let squareObj:Square = {x:i,y:j,cookie:intialBoard.length,piece:undefined}
+                let squareObj:Square = {x:i,y:j,cookie:intialBoard.length,piece:undefined,isSelected:false}
                 intialBoard.push(squareObj);
             }
         }
@@ -80,7 +73,6 @@ export default function ChessBoard():JSX.Element{
                 mr = {pieceX: -board[selectedPiece.current].x+9,pieceY:-board[selectedPiece.current].y+9,newX:-board[key].x+9,newY:-board[key].y+9}
             }
             
-            console.log('Sending move ',isWhite)
             socket.emit('moveRequest',mr)
             selectedPiece.current = null
             return 
@@ -88,7 +80,6 @@ export default function ChessBoard():JSX.Element{
         //board[key] space we click, selectedPiece space we clicked
         if(selectedPiece.current === null&&board[key].piece !== undefined){//if there is no selected piece and we have clicked a piece 
             selectedPiece.current = key;
-            console.log(selectedPiece,key)
         }
         
     }

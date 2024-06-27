@@ -11,11 +11,6 @@ export function RoomPage(){
     const [isWhite,setIsWhite] = useState(true);
     const [joinRoomId,setJoinRoomId] = useState('')
     //create room 
-    function createRoom(){
-        console.log("create a Room")
-        
-        socket.emit('create-room',isWhite)
-    }
     const handleInputChange=(e:React.FormEvent<HTMLInputElement>)=>{
         setJoinRoomId(e.currentTarget.value)
     }

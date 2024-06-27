@@ -26,3 +26,7 @@ export interface MoveRequest{
     newX:number,
     newY:number
 }
+export interface MoveResponse{
+    playerColor:boolean,
+    gameFormat: GameFormat
+}

@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import {Server, Socket} from 'socket.io'
 import Game, { gameFunction } from './Game-classes/Game'
-import {GameFormat,PieceFormat,MoveRequest,exportToGF}  from '../shared/gameRequests'
+import {GameFormat,PieceFormat,MoveRequest,exportToGF,MoveResponse}  from '../shared/gameRequests'
 import { Player } from './Game-classes/Player';
 
 
@@ -30,7 +30,6 @@ function reportError(socket:Socket,roomId:string, errorMsg:string){
   socket.emit('ERROR',errorMsg)
 }
 io.on('connection',(socket)=>{
-  console.log('a user connected')
   //creating a room
   socket.on('create-room',(isWhite)=>{
       
@@ -38,17 +37,14 @@ io.on('connection',(socket)=>{
       const newPlayer:playerFormat = {socketId:socket.id,color:isWhite} 
       const playerArray:playerFormat[] = [newPlayer]
       rooms.set(roomID, {roomId:roomID,players:playerArray,game:undefined,messages:[]})
-      console.log('room created',roomID)
       socket.emit('room-created',roomID)
   })
 
   //joining a room
   socket.on('join-room',(roomId)=>{
-    console.log(roomId)
     if(rooms.has(roomId)){
       let players = rooms.get(roomId)?.players
       if(players === undefined){return}
-      console.log(players)
       let isWhite = true;
       if(!players.find((player)=> player.socketId === socket.id)){
         let isWhite = players[0].color ? false : true
@@ -56,11 +52,12 @@ io.on('connection',(socket)=>{
       }
       else{
         isWhite = players.find((player)=> player.socketId === socket.id)?.color??isWhite
-        console.log("Already in set ")
       }
       socket.join(roomId)
       socket.emit('send-color',isWhite)
-      console.log('joined room',rooms)
+      if(players.length ==2){183788
+        startGame()
+      }
     }
     else{
       console.log("room doesnt exist")
@@ -69,20 +66,19 @@ io.on('connection',(socket)=>{
   })
   //chat functions 
   socket.on('sendMessage',(message)=>{
-    console.log(rooms,socket.id)
     let roomId = findPlayer(socket.id,rooms)
     if(roomId){
-      console.log('sending message',rooms,socket.id)
       io.to(`${roomId}`).emit('receiveMessage',message)
     }
           
     
   })
+
   //chess functions 
-  socket.on('startGame',()=>{
-    console.log("Got the request for game to start",socket.id)
+  const startGame=()=>{
+    
     let roomId = findPlayer(socket.id,rooms)
-    console.log(roomId,socket.id,rooms)
+    
     let newGame = new Game();
     newGame.intialiseBoardState()
     if(roomId){
@@ -93,20 +89,32 @@ io.on('connection',(socket)=>{
       }
       roomObj.game = newGame
       let gf = exportToGF(newGame)
-      
-      io.to(`${roomId}`).emit('receiveGame',exportToGF(newGame))
+      for(let i = 0; i< roomObj.players.length; i++){
+        const player = roomObj.players[i]
+        const moveResponse:MoveResponse = {gameFormat: gf,playerColor:player.color} 
+        io.to(player.socketId).emit('receiveGame',moveResponse)
+      }
     }
 
-  })
+  }
   socket.on('moveRequest',(mr:MoveRequest)=>{
-    console.log(mr)
+    
     let roomId = findPlayer(socket.id,rooms)
     if(roomId){
-      let game = rooms.get(roomId)?.game
-      if(!game){
+      const roomObj = rooms.get(roomId)
+
+      let game = roomObj?.game
+      if(!game || !roomObj){
         console.log("ERROR")
         return 
       }
+      //player verification 
+      const correctPlayer = roomObj.players[game.turns%2]
+      if(correctPlayer.socketId !== socket.id){
+        console.log("ERROR WRONG PLAYER")
+        return
+      }
+
       let pieceToMove = gameFunction.findPiece(mr.pieceX,mr.pieceY,game.currentBoardState)
       if(!pieceToMove){
         console.log('ERROR: piece not found')
@@ -114,7 +122,7 @@ io.on('connection',(socket)=>{
       }
       //is it the piece's turn to move?
       const colorEnum = gameFunction.determinePlayer(game)
-      console.log(colorEnum,pieceToMove.color)
+      
       if(colorEnum!== pieceToMove.color){
         console.log('ERROR: WRONG PIECE')
         return 
@@ -122,7 +130,7 @@ io.on('connection',(socket)=>{
       game.currentBoardState = pieceToMove.move(game.currentBoardState,mr.newX,mr.newY)
       const friendlyKing = game.currentBoardState.find((piece)=>piece.pieceTypeID===6 && piece.color===pieceToMove.color)
       const enemyKing = game.currentBoardState.find((piece)=>piece.pieceTypeID===6 && piece.color !== pieceToMove.color)
-      console.log(enemyKing,friendlyKing)
+      
       if(!friendlyKing || !enemyKing){
         console.log("ERROR: KING MISSING")
         return
@@ -139,8 +147,11 @@ io.on('connection',(socket)=>{
         game.checkMate = enemyKing.color
       }
       let gf = exportToGF(game)
-      console.log(gf)
-      io.to(`${roomId}`).emit('receiveGame',exportToGF(game))
+      for(let i = 0; i< roomObj.players.length; i++){
+        const player = roomObj.players[i]
+        const moveResponse:MoveResponse = {gameFormat: gf,playerColor:player.color} 
+        io.to(player.socketId).emit('receiveGame',moveResponse)
+      }
     }
   })
 
@@ -154,7 +165,7 @@ export function findPlayer(playerId:string,rooms:Map<string,roomFormat>){
   for(let [roomId,roomObj] of rooms){
     
       for(let i =0; i<roomObj.players.length;i++){
-        console.log(roomObj.players,i,roomObj.players[i])
+        
         if(roomObj.players[i].socketId===playerId){
           return roomId;
         }

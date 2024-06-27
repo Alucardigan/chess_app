@@ -57,7 +57,6 @@ class Piece{
     move(currentBoardState:Piece[],newPosX:number,newPosY:number){
         let actions  = this.generateMoveLogic(currentBoardState);
         let foundAction = actions.find((action)=> action.newPosX===newPosX&&action.newPosY===newPosY)
-        console.log(foundAction,actions,newPosX,newPosY)
         if(!foundAction){return currentBoardState}
         let newBoardState = foundAction.execute(currentBoardState)
         return newBoardState

@@ -10,10 +10,6 @@ import SocketContext from "../Components/SocketContext";
 
 
 export function ChessBoardPage(){
-    function startGame(){
-        console.log("requested for game to start")
-        socket.emit('startGame',roomId)
-    }
     const {socket,setSocket} = useContext(SocketContext)
     let {roomId} = useParams<{roomId:string}>()
     useEffect(()=>{
@@ -36,7 +32,7 @@ export function ChessBoardPage(){
                 <ChessBoard/>
                 <Spacer/>
                 <Chat/>
-                <Button onClick={startGame}>Start Game</Button>
+                
             </Flex>
         </div>
     )
