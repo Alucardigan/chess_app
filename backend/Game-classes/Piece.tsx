@@ -113,6 +113,7 @@ class Pawn extends Piece{
         }
         return actions;
     }
+    
 }
 
 class Rook extends Piece{

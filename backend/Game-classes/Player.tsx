@@ -62,7 +62,7 @@ class WhitePlayer extends Player{
     }
     
     intialisePawns(){
-        const PawnRow = 7;
+        const PawnRow = 2;
         const PawnColumnEnd = 8;
         const PawnColumnStart = 1;
         
@@ -92,7 +92,7 @@ class WhitePlayer extends Player{
         
     }
     intialiseKing(){
-        const KingX = 8;
+        const KingX = 6;
         const KingY = 5;
         return super.intialiseKing(KingX,KingY)
     }
@@ -112,7 +112,7 @@ class BlackPlayer extends Player{
     }
     
     intialisePawns(){
-        const PawnRow = 2;
+        const PawnRow = 7;
         const PawnColumnEnd = 8;
         const PawnColumnStart = 1;
         
@@ -142,7 +142,7 @@ class BlackPlayer extends Player{
         
     }
     intialiseKing(){
-        const KingX = 1;
+        const KingX = 3;
         const KingY = 5;
         return super.intialiseKing(KingX,KingY)
     }

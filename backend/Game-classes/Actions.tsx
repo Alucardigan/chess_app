@@ -134,3 +134,8 @@ export class MoveAction extends Action{
     }
 }
 
+export class PromoteAction extends Action{
+    execute(currentBoardState:Piece[]){
+        return currentBoardState
+    }
+} 
