@@ -8,18 +8,15 @@ async function run() {
     await client.connect()
     console.log("Connected to database")
     const database = client.db('chessGame');
-    console.log(database)
     const users = database.collection('chessUsers');
-    createNewUser('Alucard')
+    await createNewUser(database,'Alucard')
   } finally {
     // Ensures that the client will close when you finish/error
     await client.close();
   }
 }
-async function createNewUser(username){
-  await client.connect()
-  const db = client.db('chessGame')
-  const users = database.collection('chessUsers') 
+async function createNewUser(db,username){
+  const users = db.collection('chessUsers') 
   query = {'UID': new Date().getTime(),'userName':username}
   result = await users.insertOne(query)
   console.log(result)
