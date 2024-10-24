@@ -1,23 +1,17 @@
-import React, { useContext,useState } from 'react';
-import './App.css';
-import ChessBoard from './Components/ChessBoard';
-import { Game} from './Game-classes/Game';
-import GameContext from './Game-classes/GameContext';
-
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
+import LandingPage from './Pages/LandingPage'
 
 function App() {
-  let [gameState,setGameState] = useState(new Game());
-
+  const [count, setCount] = useState(0)
 
   return (
-    <div className="App">
-      <GameContext.Provider value={{gameState,setGameState}}>
-        <ChessBoard></ChessBoard>
-      </GameContext.Provider>
-      
-    </div>
-  );
+    <>
+      <LandingPage/>
+    </>
+  )
 }
 
-export default App;
-
+export default App
