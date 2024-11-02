@@ -17,8 +17,8 @@ async function run() {
 }
 async function createNewUser(db,username){
   const users = db.collection('chessUsers') 
-  query = {'UID': new Date().getTime(),'userName':username}
-  result = await users.insertOne(query)
+  const query = {'UID': new Date().getTime(),'userName':username}
+  const result = await users.insertOne(query)
   console.log(result)
 
 }
