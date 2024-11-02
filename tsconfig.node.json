@@ -2,21 +2,27 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023"],
-    "module": "ESNext",
+    "module": "CommonJS",
     "skipLibCheck": true,
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
+    /* Module Resolution */
+    "moduleResolution": "node", // Changed to "node" for compatibility with CommonJS and Node environments
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
 
-    /* Linting */
+    /* Linting Options */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* Path Aliases (Optional) */
+    "baseUrl": ".", // Enables relative paths in project imports
+    "paths": {
+      "*": ["./*"] // Simplifies import paths within the project structure
+    }
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "backend/**/*.ts"] // Includes backend files in type-checking
 }
