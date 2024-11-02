@@ -1,0 +1,12 @@
+{
+    "name": "chess_app",
+    "private": true,
+    "version": "0.0.0",
+    "type": "commonjs",
+    "devDependencies": {
+        "@types/express": "^5.0.0"
+    },
+    "dependencies": {
+        "cors": "^2.8.5"
+    }
+}
