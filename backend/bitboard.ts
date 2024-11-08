@@ -1,4 +1,4 @@
-import { transferableAbortSignal } from "util"
+
 
 interface BoardState{
     board:[number]   
@@ -87,5 +87,4 @@ class BitBoard{
     }
     
 }
-const bitBoard = new BitBoard()
-console.log(bitBoard.convertToString())
+export default BitBoard;
