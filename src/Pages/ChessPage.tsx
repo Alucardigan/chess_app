@@ -15,6 +15,10 @@ function ChessPage(){
         socketRef.current.on("connect",()=>{
             console.log('connected to backend',socketRef.current?.id)
         })
+        socketRef.current.on("receiveGame",(newBoardState:string)=>{
+            console.log(newBoardState)
+            setBoardState(newBoardState)
+        })
         return ()=> {
             socketRef.current?.disconnect()
             console.log('disconnected')
@@ -23,7 +27,7 @@ function ChessPage(){
     //socket events 
     const onMove =(from:number,to:number)=>{
         if(socketRef.current){
-            socketRef.current.emit('movePiece',{from,to})
+            socketRef.current.emit('movePiece',{gameID,from,to})
         }
 
     }

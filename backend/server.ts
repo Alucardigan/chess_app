@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 import {Request,Response,NextFunction,Errback} from 'express';
 import { Socket } from 'socket.io-client';
+import { handleMove } from './gameHandlerFunctions';
 const gameCreator = require('./routes/gameCreationRoutes')
 const { Server } = require("socket.io");
 const {createServer} =require('http')
@@ -36,8 +37,10 @@ app.use('/api/game/', gameCreator);
 
 io.on("connection", (socket:Socket) => {
   console.log('connected by',socket.id)
-  socket.on('movePiece',({from,to}:{from:number,to:number})=>{
-    console.log(from,to)
+  socket.on('movePiece',({gameID,from,to}:{gameID:number,from:number,to:number})=>{
+    let returnString = handleMove(Number(gameID),Number(from),Number(to))
+    console.log(returnString)
+    socket.emit('receiveGame',returnString)
   })
 });
 //server intialisation
@@ -45,3 +48,5 @@ const PORT = process.env.PORT || 8080;
 httpServer.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+
