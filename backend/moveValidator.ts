@@ -36,7 +36,6 @@ class MoveGenerator{
             move = (fromTile+1)%8 == 0 ? pawns : (pawns >> 9n) & blackPieces
             captures |= move
         }
-        console.log(moves,captures)
         return {moves,captures}
     }
 }
