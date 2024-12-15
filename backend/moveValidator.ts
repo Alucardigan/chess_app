@@ -31,12 +31,15 @@ class MoveGenerator{
         }
         else{
             const blackPieces = bitboard.getBlackPieces()
-            let move = fromTile%8==0 ? pawns : (pawns >>7n) & blackPieces
+            let move = fromTile%8==0 ? pawns : (pawns >>9n) & blackPieces
             captures |=move
-            move = (fromTile+1)%8 == 0 ? pawns : (pawns >> 9n) & blackPieces
+            move = (fromTile+1)%8 == 0 ? pawns : (pawns >> 7n) & blackPieces
             captures |= move
         }
         return {moves,captures}
+    }
+    generateBishopMoves(bitboard:BitBoard,color:number,fromTile:number){
+
     }
 }
 export default MoveGenerator
