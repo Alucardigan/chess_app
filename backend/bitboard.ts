@@ -116,6 +116,31 @@ class BitBoard{
         }
         return finalString
     }
+    getBishopMask(fromTile:number){
+        let mask = 0n 
+        let tile = 1n<<BigInt(fromTile)
+        let rank = Math.floor(fromTile/8)
+        let file = fromTile%8
+        //top right 
+        
+        for(let i=1;i<=Math.min(rank,7-file);i++){
+            mask |= tile>>BigInt(7*i)
+        }
+        //top left
+        for(let i=1;i<=Math.min(rank,file);i++){
+            mask |= tile>>BigInt(9*i)
+        }
+        //bot right
+        for(let i=1;i<=Math.min(7-rank,7-file);i++){
+            mask |= tile<<BigInt(9*i)
+        }
+        //bot left
+        for(let i=1;i<=Math.min(7-rank,file);i++){
+            mask |= tile<<BigInt(7*i)
+        }
+        return mask
+
+    }
     combinePieceStrings(str1: string, str2: string): string {
         // Use map to combine the characters from str1 and str2 more efficiently
         const translationArray = ['p','r','n','b','q','k','P','R','N','B','Q','K']
@@ -127,3 +152,4 @@ class BitBoard{
 }
 export default BitBoard;
 let bit = new BitBoard()
+bit.getBishopMask(2)
