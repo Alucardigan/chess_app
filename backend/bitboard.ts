@@ -94,7 +94,7 @@ class BitBoard{
         this.boardState[fpiece] |= toMask//add bit to it 
     }
     
-    printBit(bit:bigint){
+    printBit(bit:BigInt){
         return bit.toString(2).padStart(64,'0')
     }
     convertToString(){
@@ -138,8 +138,29 @@ class BitBoard{
         for(let i=1;i<=Math.min(7-rank,file);i++){
             mask |= tile<<BigInt(7*i)
         }
+        
         return mask
 
+    }
+    getBishopBlockers(attack:bigint){
+        let blockers = []
+        let bitIndexes = []
+        for(let i =0; i < this.printBit(attack).length;i++){
+            if((attack & 1n<<BigInt(i)) != 0n){
+                bitIndexes.push(i)
+            }
+        }
+        const totalPatterns = Math.pow(2,bitIndexes.length)
+        for(let i = 0; i < totalPatterns; i ++ ){// i here is acting as the thing that decides which combinations of indexes to use i.e if i = 2, which in binary is 10, then use array[1],etc
+            let pat = 0n
+            for(let j = 0; j<bitIndexes.length;j++){
+                if((i & (1<<j))!= 0){
+                    pat |= 1n << BigInt(bitIndexes[j])
+                }
+            }
+            blockers.push(pat)
+        }
+        return blockers
     }
     combinePieceStrings(str1: string, str2: string): string {
         // Use map to combine the characters from str1 and str2 more efficiently
@@ -148,8 +169,15 @@ class BitBoard{
             translationArray.includes(char) ? char : (translationArray.includes(str2[i]) ? str2[i] : '0')//if char is in translation array then use char, else if str[2] in translation then use str[2] else use 0
         ).join('');
     }
+    printBoard(bit:BigInt){
+        let bitString = bit.toString(2).padStart(64,'0')
+        for(let i = 0; i < bitString.length; i+= 8){
+            console.log(bitString.slice(i,i+8))
+
+        }
+    }
     
 }
 export default BitBoard;
 let bit = new BitBoard()
-bit.getBishopMask(2)
+bit.getBishopBlockers(bit.getBishopMask(2))
