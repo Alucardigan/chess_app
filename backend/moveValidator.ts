@@ -1,19 +1,51 @@
 import BitBoard from "./bitboard";
+import {BISHOP_MAGIC_NUMBERS} from "./magic"
 
+interface Response {
+    moves: bigint,
+    captures: bigint 
+}
+interface generatorHashMap {
+    [key:number] : (square: number, color: number,bitboard:BitBoard) => Response 
+}
 class MoveGenerator{
+    attackTable:bigint[][]
+    magicShifts:number[]
+    magicNumbers:bigint[]
+    generatorMap:generatorHashMap//TODO: Set a type 
     //color = 0 if black or 6 if white
-    generatePawnMoves(bitboard:BitBoard,color:number,fromTile:number){
+    constructor(){
+        this.attackTable = new Array(64)
+        this.magicShifts = this.calculateMagicShifts()
+        this.magicNumbers = BISHOP_MAGIC_NUMBERS
+        this.generatorMap = {
+            0 : this.generatePawnMoves,
+            3 : this.getLegalBishopMoves
+        }
+    }
+    generatePieceMove(square: number, pieceIdx: number,bitboard:BitBoard):Response{
+        let color = pieceIdx < 6 ? 1 : 0 
+        if(pieceIdx > 5){
+            pieceIdx -=6
+        }
+        let response = this.generatorMap[pieceIdx](square,color,bitboard)
+        console.log('color',color,response)
+        return response 
+    }
+    generatePawnMoves(square: number, color: number,bitboard:BitBoard):Response{
+        
         let moves = 0n
         let pawns  = bitboard.boardState[color ]
-        pawns = pawns & (1n<<BigInt(fromTile))
+        pawns = pawns & (1n<<BigInt(square))
         //single move
         let move = color == 0 ? pawns<<8n : pawns >> 8n
         const pieceBlocks = bitboard.getAllPieces()
         const emptyspaces = pieceBlocks^0b1111111111111111111111111111111111111111111111111111111111111111n
         move &=emptyspaces
         moves |=move
+        console.log('pawn Generator',square,color,move,pawns,emptyspaces,pieceBlocks)
         //double move
-        if((color==0 && fromTile>=8 &&fromTile <=15)||(color==6 && fromTile>=48 && fromTile <=55)){
+        if((color==0 && square>=8 &&square <=15)||(color==6 && square>=48 && square <=55)){
             let move = color == 0 ? pawns<<16n : pawns >> 16n
             const pieceBlocks = bitboard.getAllPieces()
             const emptyspaces = pieceBlocks^0b1111111111111111111111111111111111111111111111111111111111111111n
@@ -24,42 +56,32 @@ class MoveGenerator{
         let captures  = 0n
         if(color==0){
             const whitePieces = bitboard.getWhitePieces()
-            let move = fromTile%8==0 ? pawns : (pawns << 7n) & whitePieces
+            let move = square%8==0 ? pawns : (pawns << 7n) & whitePieces
             captures |=move
-            move = (fromTile+1)%8 == 0 ? pawns : (pawns << 9n) & whitePieces
+            move = (square+1)%8 == 0 ? pawns : (pawns << 9n) & whitePieces
             captures |= move
         }
         else{
             const blackPieces = bitboard.getBlackPieces()
-            let move = fromTile%8==0 ? pawns : (pawns >>9n) & blackPieces
+            let move = square%8==0 ? pawns : (pawns >>9n) & blackPieces
             captures |=move
-            move = (fromTile+1)%8 == 0 ? pawns : (pawns >> 7n) & blackPieces
+            move = (square+1)%8 == 0 ? pawns : (pawns >> 7n) & blackPieces
             captures |= move
         }
         return {moves,captures}
     }
-    generateBishopMoves(){
-        let AttackTable = []
-        for(let i = 0; i <64; i++){
-            let attack = this.getBishopMask(i)
-            let blockers = this.getBishopBlockers(attack)
-            this.printBoard(attack)
-            for(let blocker of blockers){
-                let legalAttack = attack ^ blocker
-                this.printBoard(legalAttack)
-
-                let tile = 1n<<BigInt(i)
-                let rank = Math.floor(i/8)
-                let file = i%8
-                console.log(rank,file,i)
-                for(let j = 1; j <= Math.min(rank,7-file);j++){
-                    
-                }
-                
-            }
-            break;
+    generateBishopMoves() {
+        for(let i = 0; i < 64; i++) {
+          const attack = this.getBishopMask(i);
+          const blockers = this.getBishopBlockers(attack);
+          this.attackTable[i] = new Array(1 << this.popCount(attack));
+          
+          for(let blocker of blockers) {
+            const key = this.getMagicIndex(blocker, this.magicNumbers[i], this.magicShifts[i]);
+            this.attackTable[i][key] = this.calculateBishopAttacks(i, blocker);
+          }
         }
-    }
+      }
     getBishopMask(fromTile:number){//function to generate bishop attack squares from a tile 
         let mask = 0n 
         let tile = 1n<<BigInt(fromTile)
@@ -106,6 +128,98 @@ class MoveGenerator{
         }
         return blockers
     }
+    calculateMagicShifts(): number[] {
+        const magicShifts = new Array(64);
+        
+        for(let square = 0; square < 64; square++) {
+            // Calculate bishop attack mask for this square
+            const mask = this.getBishopMask(square);
+            
+            // Count bits in the mask
+            let relevantBits = 0;
+            let tempMask = mask;
+            while(tempMask !== 0n) {
+                relevantBits++;
+                tempMask &= tempMask - 1n;
+            }
+            
+            // Magic index needs to map to a table of size 2^relevantBits
+            // So we shift by (64 - relevantBits)
+            magicShifts[square] = 64 - relevantBits;
+        }
+        
+        return magicShifts;
+    }
+    calculateBishopAttacks(square: number, blockers: bigint): bigint {
+        let attacks = 0n;
+        let rank = Math.floor(square/8);
+        let file = square%8;
+        
+        // Calculate attacks in all four diagonal directions
+        // Northeast
+        for(let r = rank + 1, f = file + 1; r < 8 && f < 8; r++, f++) {
+          const squareMask = 1n << BigInt(r * 8 + f);
+          attacks |= squareMask;
+          if((blockers & squareMask) !== 0n) break;
+        }
+        
+        // Northwest
+        for(let r = rank + 1, f = file - 1; r < 8 && f >= 0; r++, f--) {
+          const squareMask = 1n << BigInt(r * 8 + f);
+          attacks |= squareMask;
+          if((blockers & squareMask) !== 0n) break;
+        }
+        
+        // Southeast
+        for(let r = rank - 1, f = file + 1; r >= 0 && f < 8; r--, f++) {
+          const squareMask = 1n << BigInt(r * 8 + f);
+          attacks |= squareMask;
+          if((blockers & squareMask) !== 0n) break;
+        }
+        
+        // Southwest
+        for(let r = rank - 1, f = file - 1; r >= 0 && f >= 0; r--, f--) {
+          const squareMask = 1n << BigInt(r * 8 + f);
+          attacks |= squareMask;
+          if((blockers & squareMask) !== 0n) break;
+        }
+        
+        return attacks;
+      }
+    // AI function: gets the number of bits in a bigint number. Used for calculating the size of each array inside the attacker table
+    popCount(x: bigint): number {
+        let count = 0;
+        while(x !== 0n) {
+          count++;
+          x &= x - 1n;
+        }
+        return count;
+      }
+    getMagicIndex(blockers: bigint, magic: bigint, shift: number): number {
+    return Number((blockers * magic) >> BigInt(shift));
+    }
+    getLegalBishopMoves(square: number, color: number,bitboard:BitBoard): Response {
+        let allPieces = bitboard.getAllPieces()
+        let friendlyPieces = bitboard.getBlackPieces()
+        if(color==0){
+            friendlyPieces = bitboard.getWhitePieces()
+        }
+        // Get the blockers for magic index calculation
+        const blockers = allPieces & this.getBishopMask(square);
+        
+        // Use magic indexing to get all possible moves
+        const key = this.getMagicIndex(blockers, this.magicNumbers[square], this.magicShifts[square]);
+        const allPossibleMoves = this.attackTable[square][key];
+        
+        // Captures are moves that intersect with enemy pieces
+        // Enemy pieces = all pieces EXCEPT friendly pieces (XOR with friendly pieces)
+        const captures = allPossibleMoves & (allPieces ^ friendlyPieces);
+        
+        // Quiet moves are moves that don't land on any pieces
+        const moves = allPossibleMoves & ~allPieces;
+        
+        return { moves, captures };
+    }
     //debug methods
     printBit(bit:BigInt){
         return bit.toString(2).padStart(64,'0')
@@ -118,6 +232,5 @@ class MoveGenerator{
         }
     }
 }
-let a = new MoveGenerator()
-a.generateBishopMoves()
+
 export default MoveGenerator
