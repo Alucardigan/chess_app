@@ -225,23 +225,21 @@ class MoveGenerator{
     generateKnightMoves(square:number,pieceIdx:number,bitboard:BitBoard){
         let moves = 0n
         let captures = 0n
+        //edges
         const RANK1 = 0b0000000011111111111111111111111111111111111111111111111111111111n
         const RANK2 = 0b1111111100000000111111111111111111111111111111111111111111111111n
         const RANK7 = 0b1111111111111111111111111111111111111111111111110000000011111111n
         const RANK8 = 0b1111111111111111111111111111111111111111111111111111111100000000n
-
         const A_FILE =0b1111111011111110111111101111111011111110111111101111111011111110n
         const B_FILE =0b1111110111111101111111011111110111111101111111011111110111111101n
         const G_FILE =0b1011111110111111101111111011111110111111101111111011111110111111n 
         const H_FILE =0b0111111101111111011111110111111101111111011111110111111101111111n
         
-        this.printBoard(RANK1)
         const pieceBlocks = bitboard.getAllPieces()
         const emptyspaces = pieceBlocks^0b1111111111111111111111111111111111111111111111111111111111111111n
         let knights = bitboard.boardState[pieceIdx]
-        let knight = knights & (1n<<BigInt(square))
-        this.printBoard(knight)
-        console.log('moves')
+        let knight = knights & (1n<<BigInt(square))//masking
+        //move the piece and exclude ranks and files from which it shouldnt make the move
         moves |= ((knight&A_FILE&RANK7&RANK8) >> 17n) // top left 
         moves |= ((knight&H_FILE&RANK7&RANK8) >> 15n) // top right
         moves |= ((knight&A_FILE&B_FILE&RANK8) >> 10n) // small top left
@@ -254,10 +252,6 @@ class MoveGenerator{
         const oppPieces = pieceIdx < 6 ? bitboard.getWhitePieces() :bitboard.getBlackPieces()
         captures = moves & oppPieces
         moves &= emptyspaces// only move to empty spaces
-
-        
-        this.printBoard(moves)
-
         return {moves,captures}
     }
     //debug methods
