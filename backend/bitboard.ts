@@ -79,6 +79,7 @@ class BitBoard{
         let toMask = 1n << BigInt(to)
         
         const {moves,captures} = this.movegen.generatePieceMove(from,fpiece,this)
+        console.log(moves)
         toMask &= moves 
         if(toMask !=0n){
             this.boardState[fpiece] &= ~fromMask//remove bit from its place 

@@ -19,34 +19,34 @@ class MoveGenerator{
         this.magicShifts = this.calculateMagicShifts()
         this.magicNumbers = BISHOP_MAGIC_NUMBERS
         this.generatorMap = {
-            0 : this.generatePawnMoves,
-            3 : this.getLegalBishopMoves
+            0 : this.generatePawnMoves.bind(this),
+            3 : this.getLegalBishopMoves.bind(this),
+            6 : this.generatePawnMoves.bind(this),
+            9 : this.getLegalBishopMoves.bind(this)
         }
+        this.generateBishopMoves()
     }
     generatePieceMove(square: number, pieceIdx: number,bitboard:BitBoard):Response{
-        let color = pieceIdx < 6 ? 1 : 0 
-        if(pieceIdx > 5){
-            pieceIdx -=6
-        }
-        let response = this.generatorMap[pieceIdx](square,color,bitboard)
-        console.log('color',color,response)
+        console.log(pieceIdx)
+        let response = this.generatorMap[pieceIdx](square,pieceIdx,bitboard)
+        console.log('color',response)
         return response 
     }
-    generatePawnMoves(square: number, color: number,bitboard:BitBoard):Response{
+    generatePawnMoves(square: number, pieceIdx: number,bitboard:BitBoard):Response{
         
         let moves = 0n
-        let pawns  = bitboard.boardState[color ]
+        let pawns  = bitboard.boardState[pieceIdx ]
         pawns = pawns & (1n<<BigInt(square))
         //single move
-        let move = color == 0 ? pawns<<8n : pawns >> 8n
+        let move = pieceIdx < 6 ? pawns<<8n : pawns >> 8n
         const pieceBlocks = bitboard.getAllPieces()
         const emptyspaces = pieceBlocks^0b1111111111111111111111111111111111111111111111111111111111111111n
         move &=emptyspaces
         moves |=move
-        console.log('pawn Generator',square,color,move,pawns,emptyspaces,pieceBlocks)
+        console.log('pawn Generator',square,pieceIdx,move,pawns,emptyspaces,pieceBlocks)
         //double move
-        if((color==0 && square>=8 &&square <=15)||(color==6 && square>=48 && square <=55)){
-            let move = color == 0 ? pawns<<16n : pawns >> 16n
+        if((pieceIdx<6 && square>=8 &&square <=15)||(pieceIdx>=6 && square>=48 && square <=55)){
+            let move = pieceIdx<6 ? pawns<<16n : pawns >> 16n
             const pieceBlocks = bitboard.getAllPieces()
             const emptyspaces = pieceBlocks^0b1111111111111111111111111111111111111111111111111111111111111111n
             move &=emptyspaces
@@ -54,7 +54,7 @@ class MoveGenerator{
         }
         //captures 
         let captures  = 0n
-        if(color==0){
+        if(pieceIdx<6){
             const whitePieces = bitboard.getWhitePieces()
             let move = square%8==0 ? pawns : (pawns << 7n) & whitePieces
             captures |=move
@@ -198,12 +198,9 @@ class MoveGenerator{
     getMagicIndex(blockers: bigint, magic: bigint, shift: number): number {
     return Number((blockers * magic) >> BigInt(shift));
     }
-    getLegalBishopMoves(square: number, color: number,bitboard:BitBoard): Response {
+    getLegalBishopMoves(square: number, pieceIdx: number,bitboard:BitBoard): Response {
         let allPieces = bitboard.getAllPieces()
-        let friendlyPieces = bitboard.getBlackPieces()
-        if(color==0){
-            friendlyPieces = bitboard.getWhitePieces()
-        }
+        let friendlyPieces = pieceIdx < 6 ? bitboard.getBlackPieces() : bitboard.getWhitePieces()
         // Get the blockers for magic index calculation
         const blockers = allPieces & this.getBishopMask(square);
         
