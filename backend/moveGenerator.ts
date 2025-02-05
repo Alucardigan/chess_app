@@ -52,7 +52,6 @@ class MoveGenerator{
         const emptyspaces = pieceBlocks^0b1111111111111111111111111111111111111111111111111111111111111111n
         move &=emptyspaces
         moves |=move
-        console.log('pawn Generator',square,pieceIdx,move,pawns,emptyspaces,pieceBlocks)
         //double move
         if((pieceIdx<6 && square>=8 &&square <=15)||(pieceIdx>=6 && square>=48 && square <=55)){
             let move = pieceIdx<6 ? pawns<<16n : pawns >> 16n
@@ -185,6 +184,22 @@ class MoveGenerator{
         moves &= emptyspaces// only move to empty spaces
 
         return {moves,captures}
+    }
+    checkForCheck(pieceIdx:number,bitboard:BitBoard):Boolean{
+        const king = bitboard.boardState[pieceIdx < 6 ? 5:11]
+        const kingSquare = Math.floor(Math.log2(Number(king)))
+        let pawnCaptures = this.generatePawnMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
+        if((pawnCaptures.captures&bitboard.boardState[pieceIdx<6 ? 6 : 0]) != 0n){return true}
+        let rookCaptures = this.getLegalRookMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
+        if((rookCaptures.captures & bitboard.boardState[pieceIdx<6 ? 7:1])!=0n){return true}
+        let knightCaptures = this.generateKnightMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
+        if((knightCaptures.captures&bitboard.boardState[pieceIdx<6 ? 8: 2])!= 0n){return true}
+        let bishopCaptures = this.getLegalBishopMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
+        if((bishopCaptures.captures&bitboard.boardState[pieceIdx<6 ? 9 : 3])!= 0n){return true}
+        let queenCaptures = this.getLegalQueenMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
+        if((queenCaptures.captures & bitboard.boardState[pieceIdx<6 ? 10:4])!=0n){return true}
+        return false
+
     }
 
     //debug methods

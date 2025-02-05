@@ -1,4 +1,4 @@
-import MoveGenerator from "./moveValidator"
+import MoveGenerator from "./moveGenerator"
 
 
 interface BoardState{
@@ -68,6 +68,7 @@ class BitBoard{
         }
         return -1;
     }
+    //TODO: OUT OF PLACE FUNCTION
     makeMove(from:number,to:number){
         
         const fpiece = this.determinePieceIdx(from)
@@ -83,7 +84,10 @@ class BitBoard{
         toMask &= moves 
         if(toMask !=0n){
             this.boardState[fpiece] &= ~fromMask//remove bit from its place 
-            this.boardState[fpiece] |= toMask//add bit to it 
+            this.boardState[fpiece] |= toMask//add bit to it
+            if(this.movegen.checkForCheck(fpiece,this)){
+                console.log('IN CHECK')
+            } 
             return
         }
         const cpiece = this.determinePieceIdx(to)
@@ -93,6 +97,7 @@ class BitBoard{
             this.boardState[fpiece] &= ~fromMask//remove bit from its place 
         }
         this.boardState[fpiece] |= toMask//add bit to it 
+        this.movegen.checkForCheck(fpiece,this)
     }
     
     printBit(bit:BigInt){
