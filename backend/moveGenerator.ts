@@ -1,5 +1,6 @@
 import bishopMagicGenerator from "./bishopMagicGen";
 import BitBoard from "./bitboard";
+import GameRunner from "./gameRunner";
 import {BISHOP_MAGIC_NUMBERS} from "./magic"
 import RookMagicGenerator from "./rookMagicGen";
 
@@ -35,9 +36,7 @@ class MoveGenerator{
         this.rookMoveGen = new RookMagicGenerator()
     }
     generatePieceMove(square: number, pieceIdx: number,bitboard:BitBoard):Response{
-        console.log(pieceIdx)
         let response = this.generatorMap[pieceIdx](square,pieceIdx,bitboard)
-        console.log('color',response)
         return response 
     }
     //pawn moves
@@ -185,22 +184,7 @@ class MoveGenerator{
 
         return {moves,captures}
     }
-    checkForCheck(pieceIdx:number,bitboard:BitBoard):Boolean{
-        const king = bitboard.boardState[pieceIdx < 6 ? 5:11]
-        const kingSquare = Math.floor(Math.log2(Number(king)))
-        let pawnCaptures = this.generatePawnMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
-        if((pawnCaptures.captures&bitboard.boardState[pieceIdx<6 ? 6 : 0]) != 0n){return true}
-        let rookCaptures = this.getLegalRookMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
-        if((rookCaptures.captures & bitboard.boardState[pieceIdx<6 ? 7:1])!=0n){return true}
-        let knightCaptures = this.generateKnightMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
-        if((knightCaptures.captures&bitboard.boardState[pieceIdx<6 ? 8: 2])!= 0n){return true}
-        let bishopCaptures = this.getLegalBishopMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
-        if((bishopCaptures.captures&bitboard.boardState[pieceIdx<6 ? 9 : 3])!= 0n){return true}
-        let queenCaptures = this.getLegalQueenMoves(kingSquare,pieceIdx < 6 ? 5:11,bitboard)
-        if((queenCaptures.captures & bitboard.boardState[pieceIdx<6 ? 10:4])!=0n){return true}
-        return false
-
-    }
+    
 
     //debug methods
     printBit(bit:BigInt){

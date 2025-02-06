@@ -20,7 +20,7 @@ interface BoardState{
 
 class BitBoard{
     boardState:bigint[]
-    movegen:MoveGenerator
+    
     constructor(){
         this.boardState = [ 
             0b0000000000000000000000000000000000000000000000001111111100000000n,//black pawns - 0 
@@ -36,7 +36,7 @@ class BitBoard{
             0b0000100000000000000000000000000000000000000000000000000000000000n,//white queen - 4 
             0b0001000000000000000000000000000000000000000000000000000000000000n,//white king - 5 
         ]
-        this.movegen = new MoveGenerator()
+        
     }
     getBoardState(){
         return this.boardState
@@ -68,37 +68,7 @@ class BitBoard{
         }
         return -1;
     }
-    //TODO: OUT OF PLACE FUNCTION
-    makeMove(from:number,to:number){
-        
-        const fpiece = this.determinePieceIdx(from)
-        console.log(this.boardState[fpiece].toString(2))
-        if(fpiece ==-1){
-            console.log("Is not a selected piece")
-        }
-        const fromMask = 1n<< BigInt(from)
-        let toMask = 1n << BigInt(to)
-        
-        const {moves,captures} = this.movegen.generatePieceMove(from,fpiece,this)
-        console.log(moves)
-        toMask &= moves 
-        if(toMask !=0n){
-            this.boardState[fpiece] &= ~fromMask//remove bit from its place 
-            this.boardState[fpiece] |= toMask//add bit to it
-            if(this.movegen.checkForCheck(fpiece,this)){
-                console.log('IN CHECK')
-            } 
-            return
-        }
-        const cpiece = this.determinePieceIdx(to)
-        toMask = (1n<<BigInt(to)) & captures
-        if(toMask!=0n){
-            this.boardState[cpiece] &= ~toMask//remove the captured bit 
-            this.boardState[fpiece] &= ~fromMask//remove bit from its place 
-        }
-        this.boardState[fpiece] |= toMask//add bit to it 
-        this.movegen.checkForCheck(fpiece,this)
-    }
+    
     
     printBit(bit:BigInt){
         return bit.toString(2).padStart(64,'0')
@@ -140,4 +110,3 @@ class BitBoard{
     
 }
 export default BitBoard;
-let bit = new BitBoard()
