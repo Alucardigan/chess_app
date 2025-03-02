@@ -1,4 +1,4 @@
-import MoveGenerator from "./moveGenerator"
+
 
 
 interface BoardState{
@@ -20,6 +20,10 @@ interface BoardState{
 
 class BitBoard{
     boardState:bigint[]
+    WHITE_KING_SIDE_CASTLE : Boolean
+    WHITE_QUEEN_SIDE_CASTLE : Boolean
+    BLACK_KING_SIDE_CASTLE : Boolean
+    BLACK_QUEEN_SIDE_CASTLE : Boolean
     
     constructor(){
         this.boardState = [ 
@@ -36,6 +40,10 @@ class BitBoard{
             0b0000100000000000000000000000000000000000000000000000000000000000n,//white queen - 4 
             0b0001000000000000000000000000000000000000000000000000000000000000n,//white king - 5 
         ]
+        this.WHITE_KING_SIDE_CASTLE = true
+        this.WHITE_QUEEN_SIDE_CASTLE = true
+        this.BLACK_KING_SIDE_CASTLE = true
+        this.BLACK_QUEEN_SIDE_CASTLE = true
         
     }
     getBoardState(){
@@ -71,14 +79,12 @@ class BitBoard{
     
     
     printBit(bit:BigInt){
-        return bit.toString(2).padStart(64,'0')
+        console.log(bit.toString(2).padStart(64,'0'))
     }
     convertToString(){
         let translationMap = new Map<number,string>([
             [0,'p'],[1,'r'],[2,'n'],[3,'b'],[4,'q'],[5,'k'],[6,'P'],[7,'R'],[8,'N'],[9,'B'],[10,'Q'],[11,'K']
         ]);
-        
-        let pieceStrings:string[] = []
         let finalString = ''.padStart(64,'0')
         for(let i = 0; i<this.boardState.length;i++){
             let pieceString = this.boardState[i].toString(2).padStart(64,'0')

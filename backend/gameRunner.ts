@@ -70,15 +70,14 @@ class GameRunner{
         let opposiingColorIdx = pieceIdx < 6 ? 0: 6 //get the opposing color's pawn index  
         //check if we are in check 
         if(this.checkForCheck(pieceIdx < 6 ? 5:11,bitboard) === false){
-            console.log('we are indeed in check')
+            console.log('we are not in check')
             return false
         }
         for(let i = opposiingColorIdx; i < opposiingColorIdx+6; i++){
             let pieces = bitboard.boardState[i]
-            bitboard.printBoard(pieces)
             while(pieces != 0n){
                 const square = Number(pieces & -pieces).toString(2).length - 1
-                console.log(square,Number(pieces))
+
                 const {moves,captures } = this.movegen.generatePieceMove(square,i,bitboard) 
                 let allMoves = moves | captures
                 while(allMoves != 0n){
