@@ -137,7 +137,6 @@ class MoveGenerator{
         
         // Quiet moves are moves that don't land on any pieces
         const moves = allPossibleMoves & ~allPieces;
-        this.printBoard(moves|captures)
         return { moves, captures };
     }
     //queen moves 

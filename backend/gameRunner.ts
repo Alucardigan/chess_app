@@ -14,13 +14,22 @@ interface CastleRookMove {
     rPieceIdx : number,
     kPieceIdx : number
 }
+interface PromotionTarget{
+    white : number,
+    black : number
+}
 class GameRunner{
     //wanted a class that handles game moves that isnt the bitboard itself
     gameStates: BitBoard[]
     movegen:MoveGenerator
+    promotionTarget:PromotionTarget
     constructor(){
         this.gameStates = [new BitBoard()]
         this.movegen = new MoveGenerator()
+        this.promotionTarget = {
+            white : 10,
+            black : 4
+        }
     }
     makeMove(from:number,to:number){
         
@@ -56,6 +65,7 @@ class GameRunner{
             resBoard.boardState[cpiece] &= ~toMask //remove the captured bit
         }
         resBoard.boardState[fpiece] |= toMask
+        resBoard = this.promotionUpdate(fpiece,resBoard)
         resBoard = this.castlingUpdate(from,to,fpiece,curBoard,resBoard)
         return resBoard
     }
@@ -119,6 +129,38 @@ class GameRunner{
         return newBoard
 
     }
+    promotionUpdate(pieceIdx:number,newBoard:BitBoard){
+        if(pieceIdx<6){
+            const PAWN_IDX = 0 
+            const targetRow = 0b1111111100000000000000000000000000000000000000000000000000000000n
+            let pawns = newBoard.boardState[PAWN_IDX];
+            pawns &= targetRow
+            if(pawns===0n){
+                console.log('no pawns to promote')
+                return newBoard
+            }
+            newBoard.boardState[PAWN_IDX] &= ~pawns
+            newBoard.boardState[this.promotionTarget.black] |= pawns
+            return newBoard
+        }
+        else{
+            const PAWN_IDX = 6 
+            const targetRow = 0b0000000000000000000000000000000000000000000000000000000011111111n
+            let pawns = newBoard.boardState[PAWN_IDX];
+            pawns &= targetRow
+            if(pawns===0n){
+                console.log('no pawns to promote')
+                return newBoard
+            }
+            newBoard.boardState[PAWN_IDX] &= ~pawns
+            newBoard.boardState[this.promotionTarget.white] |= pawns
+            return newBoard
+        }
+        
+        
+
+    }
+
     checkForCheck(pieceIdx:number,bitboard:BitBoard):Boolean{
         const king = bitboard.boardState[pieceIdx < 6 ? 5:11]
         if(king===0n){return true}
@@ -157,7 +199,6 @@ class GameRunner{
                 while(allMoves != 0n){
                     const moveSquare = Number(allMoves & -allMoves).toString(2).length - 1
                     const newBoard = this.testMove(square,moveSquare,allMoves,bitboard)
-                    console.log(square,moveSquare)
                     if(!(this.checkForCheck(pieceIdx < 6 ? 5:11,newBoard))){
                         console.log('no longer in check due to', square,moveSquare)
                         return false
