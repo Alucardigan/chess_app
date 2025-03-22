@@ -137,7 +137,7 @@ class MoveGenerator{
         
         // Quiet moves are moves that don't land on any pieces
         const moves = allPossibleMoves & ~allPieces;
-        
+        this.printBoard(moves|captures)
         return { moves, captures };
     }
     //queen moves 
@@ -160,9 +160,6 @@ class MoveGenerator{
         const WHITE_QUEEN_SIDE_CASTLE = 0b0000111000000000000000000000000000000000000000000000000000000000n
         const BLACK_KING_SIDE_CASTLE  = 0b0000000000000000000000000000000000000000000000000000000001100000n
         const BLACK_QUEEN_SIDE_CASTLE = 0b0000000000000000000000000000000000000000000000000000000000001110n
-        const WHITE_KING_SIDE_CASTLE_SQUARES = [61,62]
-        const WHITE_QUEEN_SIDE_CASTLE_SQUARES = [58,59]
-
         const pieceBlocks = bitboard.getAllPieces()
         const emptyspaces = pieceBlocks^0b1111111111111111111111111111111111111111111111111111111111111111n
         let king = bitboard.boardState[pieceIdx]
@@ -182,14 +179,12 @@ class MoveGenerator{
             if((bitboard.WHITE_KING_SIDE_CASTLE)&&((WHITE_KING_SIDE_CASTLE&pieceBlocks) ===0n)){
                 let castlingMove = (king)|(king << 1n)|(king << 2n)
                 if((am&castlingMove)===0n){
-                    console.log("Castling allowed")
                     moves |= (king << 2n)
                 }
             }
             if((bitboard.WHITE_QUEEN_SIDE_CASTLE)&&((WHITE_QUEEN_SIDE_CASTLE&pieceBlocks) ===0n)){
                 let castlingMove = (king)|(king >> 1n)|(king >> 2n)|(king >> 3n)
                 if((am&castlingMove)===0n){
-                    console.log("Queen Castling allowed")
                     moves |= (king >>2n)
                 }
             
@@ -199,14 +194,12 @@ class MoveGenerator{
             if((bitboard.BLACK_KING_SIDE_CASTLE)&&((BLACK_KING_SIDE_CASTLE&pieceBlocks) ===0n)){
                 let castlingMove = (king)|(king << 1n)|(king << 2n)
                 if((am&castlingMove)===0n){
-                    console.log("Castling allowed")
                     moves |= (king << 2n)
                 }
             }
             if((bitboard.BLACK_QUEEN_SIDE_CASTLE)&&((BLACK_QUEEN_SIDE_CASTLE&pieceBlocks) ===0n)){
                 let castlingMove = (king)|(king >> 1n)|(king >> 2n)|(king >> 3n)
                 if((am&castlingMove)===0n){
-                    console.log("Queen Castling allowed")
                     moves |= (king >>2n)
                 }
             }    
@@ -270,6 +263,6 @@ class MoveGenerator{
 }
 
 export default MoveGenerator
-let a = new MoveGenerator()
 
-//a.generateAttackMask(11,new BitBoard())
+
+

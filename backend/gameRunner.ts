@@ -1,7 +1,19 @@
 
+import { flattenTokens } from "@chakra-ui/react"
 import BitBoard from "./bitboard"
 import MoveGenerator from "./moveGenerator"
 
+interface CastleRookMove {
+    flag : Boolean,
+    nflag : Boolean,
+    rFromMask: bigint,
+    rToMask: bigint,
+    kFromMask : bigint,
+    kToMask : bigint,
+
+    rPieceIdx : number,
+    kPieceIdx : number
+}
 class GameRunner{
     //wanted a class that handles game moves that isnt the bitboard itself
     gameStates: BitBoard[]
@@ -44,7 +56,68 @@ class GameRunner{
             resBoard.boardState[cpiece] &= ~toMask //remove the captured bit
         }
         resBoard.boardState[fpiece] |= toMask
+        resBoard = this.castlingUpdate(from,to,fpiece,curBoard,resBoard)
         return resBoard
+    }
+    castlingUpdate(from:number,to:number,pieceIdx:number,prevBoard:BitBoard,newBoard:BitBoard){
+        console.log("Castling check")
+        let castles: Record<number,CastleRookMove> = {
+            6062:{
+                flag : newBoard.WHITE_KING_SIDE_CASTLE,
+                nflag : newBoard.WHITE_QUEEN_SIDE_CASTLE,
+                rFromMask:  0b1000000000000000000000000000000000000000000000000000000000000000n,
+                rToMask :   0b0010000000000000000000000000000000000000000000000000000000000000n,
+                kFromMask : 0b0001000000000000000000000000000000000000000000000000000000000000n,
+                kToMask :   0b0100000000000000000000000000000000000000000000000000000000000000n,
+                rPieceIdx : 7,
+                kPieceIdx : 11
+                
+            },
+            6058:{
+                flag : newBoard.WHITE_QUEEN_SIDE_CASTLE,
+                nflag : newBoard.WHITE_KING_SIDE_CASTLE,
+                rFromMask:  0b0000000100000000000000000000000000000000000000000000000000000000n,
+                rToMask :   0b0000100000000000000000000000000000000000000000000000000000000000n,
+                kFromMask : 0b0001000000000000000000000000000000000000000000000000000000000000n,
+                kToMask :   0b0000010000000000000000000000000000000000000000000000000000000000n,
+                rPieceIdx : 7,
+                kPieceIdx : 11
+            },
+            406:{
+                flag : newBoard.BLACK_KING_SIDE_CASTLE,
+                nflag : newBoard.WHITE_QUEEN_SIDE_CASTLE,
+                rFromMask:  0b0000000000000000000000000000000000000000000000000000000010000000n,
+                rToMask :   0b0000000000000000000000000000000000000000000000000000000000100000n,
+                kFromMask : 0b0000000000000000000000000000000000000000000000000000000000010000n,
+                kToMask :   0b0000000000000000000000000000000000000000000000000000000001000000n,
+                rPieceIdx : 1,
+                kPieceIdx : 5
+            },
+            402:{
+                flag : newBoard.BLACK_QUEEN_SIDE_CASTLE,
+                nflag : newBoard.WHITE_QUEEN_SIDE_CASTLE,
+                rFromMask:  0b0000000000000000000000000000000000000000000000000000000000000001n,
+                rToMask :   0b0000000000000000000000000000000000000000000000000000000000001000n,
+                kFromMask : 0b0000000000000000000000000000000000000000000000000000000000010000n,
+                kToMask :   0b0000000000000000000000000000000000000000000000000000000000000100n,
+                
+                rPieceIdx : 1,
+                kPieceIdx : 5
+            }
+        }
+        let key = from * 100 + to
+        let castlingMove = castles[key]
+        if(castlingMove === undefined){
+            console.log("Failed check")
+            return newBoard
+        }
+        if(castlingMove.kFromMask ===  prevBoard.boardState[pieceIdx] && castlingMove.kToMask === newBoard.boardState[pieceIdx]){
+            console.log("castling success")
+            newBoard.boardState[castlingMove.rPieceIdx] &= ~castlingMove.rFromMask
+            newBoard.boardState[castlingMove.rPieceIdx] |= castlingMove.rToMask 
+        }
+        return newBoard
+
     }
     checkForCheck(pieceIdx:number,bitboard:BitBoard):Boolean{
         const king = bitboard.boardState[pieceIdx < 6 ? 5:11]
@@ -64,6 +137,7 @@ class GameRunner{
         return false
 
     }
+
     checkForMate(pieceIdx:number,bitboard:BitBoard):Boolean{
         const king = bitboard.boardState[pieceIdx < 6 ? 5:11]
         const kingSquare = Math.floor(Math.log2(Number(king)))
