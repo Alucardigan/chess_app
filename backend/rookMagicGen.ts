@@ -25,7 +25,6 @@ class RookMagicGenerator {
                     map.set(key,1)
                 }
                 else{
-                    console.log('collision detected',genMgNum,key,i)
                     bl = 0
                     genMgNum =BigInt(Math.floor(Math.random()*2**64))
                     map = new Map()
@@ -33,7 +32,6 @@ class RookMagicGenerator {
             }
             this.magicNumbers[i] = genMgNum
         }
-        console.log(this.magicNumbers)
     }
     generateRookMoves() {
         for (let i = 0; i < 64; i++) {
@@ -42,8 +40,8 @@ class RookMagicGenerator {
             this.attackTable[i] = new Array(1 << this.popCount(attack));
 
             for (let blocker of blockers) {
-                
                 const key = this.getMagicIndex(blocker, this.magicNumbers[i], this.magicShifts[i]);
+                
                 
                 this.attackTable[i][key] = this.calculateRookAttacks(i, blocker);
             }
@@ -73,6 +71,30 @@ class RookMagicGenerator {
         }
         return mask;
     }
+    getAltRookMask(fromTile: number) {
+        let mask = 0n;
+        // Don't include the rook's square: let square = 1n << BigInt(fromTile)
+        let rank = Math.floor(fromTile / 8);
+        let file = fromTile % 8;
+    
+        // Right
+        for (let i = 1; i < (8 - file); i++) {
+            mask |= 1n << BigInt(fromTile + i);
+        }
+        // Left
+        for (let i = 1; i <= file; i++) {
+            mask |= 1n << BigInt(fromTile - i);
+        }
+        // Up
+        for (let i = 1; i < (8 - rank); i++) {
+            mask |= 1n << BigInt(fromTile + (8 * i));
+        }
+        // Down
+        for (let i = 1; i <= rank; i++) {
+            mask |= 1n << BigInt(fromTile - (8 * i));
+        }
+        return mask;
+    }
     getRookBlockers(attack: bigint) {
         let blockers = []
         let bitIndexes = []
@@ -95,6 +117,18 @@ class RookMagicGenerator {
     }
     calculateMagicShifts(): number[] {
         const magicShifts = new Array(64);
+        /*
+        [
+            52, 53, 53, 53, 53, 53, 53, 52, 
+            53, 54, 54, 54, 54, 54, 54, 53, 
+            53, 54, 54, 54, 54, 54, 54, 53,
+            53, 54, 54, 54, 54, 54, 54, 53, 
+            53, 54, 54, 54, 54, 54, 54, 53, 
+            53, 54, 54, 54, 54, 54, 54, 53,
+            53, 54, 54, 54, 54, 54, 54, 53, 
+            52, 53, 53, 53, 53, 53, 53, 52
+            ]
+        */
 
         for (let square = 0; square < 64; square++) {
             const mask = this.getRookMask(square);
@@ -106,7 +140,6 @@ class RookMagicGenerator {
             }
             magicShifts[square] = 64 - relevantBits;
         }
-
         return magicShifts;
     }
     calculateRookAttacks(square: number, blockers: bigint): bigint {

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 function LandingPage(){
   const [nameString, setNameString] = useState("");
   const navigator = useNavigate()
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(true);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

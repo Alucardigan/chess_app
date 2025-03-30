@@ -29,7 +29,7 @@ class GameRunner{
         this.promotionTarget = {
             white : 10,
             black : 4
-        }
+        }  
     }
     makeMove(from:number,to:number){
         
@@ -70,7 +70,6 @@ class GameRunner{
         return resBoard
     }
     castlingUpdate(from:number,to:number,pieceIdx:number,prevBoard:BitBoard,newBoard:BitBoard){
-        console.log("Castling check")
         let castles: Record<number,CastleRookMove> = {
             6062:{
                 flag : newBoard.WHITE_KING_SIDE_CASTLE,
