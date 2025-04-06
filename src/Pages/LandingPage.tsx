@@ -57,7 +57,9 @@ function LandingPage(){
       })
     })
     const data = await response.json()
-    const gameID = data.id
+    const gameID = data.gameID
+    const userID = data.userID
+    localStorage.setItem("chessGameUserID",userID)
     console.log(`/game/${gameID}`,data)
     navigator(`/game/${gameID}`)
   }

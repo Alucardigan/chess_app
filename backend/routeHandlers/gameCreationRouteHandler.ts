@@ -23,7 +23,15 @@ async function createPlayerGame(req:Request,res:Response){
 async function joinPlayerGame(req:Request,res:Response){
    
     const uniqueID = req.body.joinCode
-    
+    const gameRunner = activeMatches.get(Number(uniqueID))
+    const userID = gameRunner?.playerManager.addPlayer(req.body.username,GameColor.BLACK)
+    if(!gameRunner){
+        console.log("CANNOT FIND GAME")
+        return 
+    }
+    activeMatches.set(uniqueID,gameRunner)
+
+    res.status(200).json({'gameID':uniqueID,'userID':userID})
     console.log("Joining a new player game",uniqueID)
 }
 
