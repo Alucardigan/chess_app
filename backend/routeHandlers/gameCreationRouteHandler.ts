@@ -1,8 +1,9 @@
 
 import {Request,Response,NextFunction,Errback} from 'express';
-import activeMatches from './helper';
+import activeMatches, { GameColor } from './helper';
 import BitBoard from '../bitboard';
 import GameRunner from '../gameRunner';
+
 
 async function createAIGame(req:Request,res:Response){
     console.log("Creating a new AI game",req.body)
@@ -10,4 +11,21 @@ async function createAIGame(req:Request,res:Response){
     activeMatches.set(uniqueID,new GameRunner())
     res.status(200).json({'id':uniqueID})
 }
-export default createAIGame;
+async function createPlayerGame(req:Request,res:Response){
+    console.log("Creating a new player game",req.body)
+    const uniqueID = new Date().getTime()
+    const gameRunner = new GameRunner()
+    const userID = gameRunner.playerManager.addPlayer(req.body.username,GameColor.WHITE)
+    activeMatches.set(uniqueID,gameRunner)
+    res.status(200).json({'gameID':uniqueID,'userID':userID})
+}
+
+async function joinPlayerGame(req:Request,res:Response){
+   
+    const uniqueID = req.body.joinCode
+    
+    console.log("Joining a new player game",uniqueID)
+}
+
+
+export  {createAIGame,createPlayerGame,joinPlayerGame};

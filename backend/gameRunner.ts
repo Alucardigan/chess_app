@@ -2,6 +2,8 @@
 import { flattenTokens } from "@chakra-ui/react"
 import BitBoard from "./bitboard"
 import MoveGenerator from "./moveGenerator"
+import PlayerManager from "./playerManager"
+import { GameColor } from "./routeHandlers/helper"
 
 interface CastleRookMove {
     flag : Boolean,
@@ -23,13 +25,17 @@ class GameRunner{
     gameStates: BitBoard[]
     movegen:MoveGenerator
     promotionTarget:PromotionTarget
+    playerManager: PlayerManager
+    turns: number
     constructor(){
         this.gameStates = [new BitBoard()]
         this.movegen = new MoveGenerator()
         this.promotionTarget = {
             white : 10,
             black : 4
-        }  
+        }
+        this.playerManager = new PlayerManager()
+        this.turns = 0
     }
     makeMove(from:number,to:number){
         
@@ -40,6 +46,7 @@ class GameRunner{
         let allMoves = moves | captures
         const newBoard = this.testMove(from,to,allMoves,curBoard)
         this.gameStates.push(newBoard)
+        this.turns +=1 
         if(this.checkForCheck(fpiece < 6 ? 11: 5,newBoard)){
             console.log("CHECK")
             if(this.checkForMate(fpiece<6?11:5,newBoard)){
@@ -208,6 +215,12 @@ class GameRunner{
             }
         }
         return true
+    }
+    getPlayerByTurn(){
+        if(this.turns%2==0){
+            return this.playerManager.getPlayerByColor(GameColor.WHITE)
+        }
+        return this.playerManager.getPlayerByColor(GameColor.BLACK)
     }
 }
 export default GameRunner

@@ -37,8 +37,8 @@ app.use('/api/game/', gameCreator);
 
 io.on("connection", (socket:Socket) => {
   console.log('connected by',socket.id)
-  socket.on('movePiece',({gameID,from,to}:{gameID:number,from:number,to:number})=>{
-    let returnString = handleMove(Number(gameID),Number(from),Number(to))
+  socket.on('movePiece',({gameID,userID,from,to}:{gameID:number,userID: String,from:number,to:number})=>{
+    let returnString = handleMove(gameID,userID,from,to)
     console.log(returnString)
     socket.emit('receiveGame',returnString)
   })

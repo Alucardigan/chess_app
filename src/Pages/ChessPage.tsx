@@ -7,6 +7,10 @@ import { Socket, io } from "socket.io-client";
 function ChessPage(){
     //get the game state from game ID via request to backend
     const {gameID} = useParams()
+    const userID = localStorage.getItem("chessGameUserID")
+    if(!userID){
+        console.log("ERROR: userID doesnt exist")
+    }
     const [boardState,setBoardState] = useState("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR")
     //socketReferences
     const socketRef = useRef<Socket|null>(null)
@@ -27,7 +31,7 @@ function ChessPage(){
     //socket events 
     const onMove =(from:number,to:number)=>{
         if(socketRef.current){
-            socketRef.current.emit('movePiece',{gameID,from,to})
+            socketRef.current.emit('movePiece',{gameID,userID,from,to})
         }
 
     }
