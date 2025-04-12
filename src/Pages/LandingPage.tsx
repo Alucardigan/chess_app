@@ -1,4 +1,4 @@
-import { Button, FormControl, FormHelperText, FormLabel, Input } from "@chakra-ui/react";
+import { Box, Button, Container, Divider, FormControl, FormHelperText, FormLabel, Heading, Input, VStack,Text, useColorModeValue } from "@chakra-ui/react";
 import { join } from "path";
 
 import { useState } from "react";
@@ -37,7 +37,7 @@ function LandingPage(){
     const data = await response.json()
     const gameID = data.gameID
     const userID = data.userID
-    localStorage.setItem("chessGameUserID",userID)
+    sessionStorage.setItem("chessGameUserID",userID)
     console.log(`/game/${gameID}`,data)
     navigator(`/game/${gameID}`)
   }
@@ -59,7 +59,7 @@ function LandingPage(){
     const data = await response.json()
     const gameID = data.gameID
     const userID = data.userID
-    localStorage.setItem("chessGameUserID",userID)
+    sessionStorage.setItem("chessGameUserID",userID)
     console.log(`/game/${gameID}`,data)
     navigator(`/game/${gameID}`)
   }
@@ -84,30 +84,126 @@ function LandingPage(){
       </div>
     );
   }
+  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
 
   return (
-    <div id="LandingPage"> 
-      Chess Game 
-      <div id="joinCard"><Button onClick={async () =>{createGame("AI")}}>Play Against AI </Button></div>
-      <label>{joinCode}</label>
-      <div id="joinCard">
-        <form onSubmit={joinGame}>
-          <FormControl>
-            <FormLabel>Enter a code and join</FormLabel>
-            <Input value={joinCode} onChange={(e)=>setJoinCode(e.target.value) }/>
-            <FormHelperText></FormHelperText>
-          </FormControl>
-          <Button
-            mt={4}
-            colorScheme='teal'
-            type='submit'
+    <Container maxW="container.md" p={5}>
+      <VStack 
+        spacing={8} 
+        align="center" 
+        bg={bgColor} 
+        borderRadius="lg" 
+        p={8} 
+        boxShadow="lg"
+      >
+        <VStack spacing={2}>
+          <Heading size="xl">Chess Master</Heading>
+          <Text fontSize="lg" color="gray.500">Challenge your mind with the game of kings</Text>
+        </VStack>
+        
+        <Box 
+          w="full" 
+          h="64" 
+          bg="gray.200" 
+          borderRadius="md" 
+          overflow="hidden"
+          position="relative"
+        >
+          {/* Chess board illustration */}
+          <Box 
+            position="absolute" 
+            top="0" 
+            left="0" 
+            right="0" 
+            bottom="0" 
+            bg="gray.300" 
+            display="grid" 
+            gridTemplateColumns="repeat(8, 1fr)" 
+            gridTemplateRows="repeat(8, 1fr)"
           >
-            Join Game
-          </Button>
-        </form>
-      </div>
-      <div id="joinCard"><Button onClick={async () =>{createGame("playerGame")}}>Create a lobby</Button></div>
-    </div>
+            {Array(64).fill(0).map((_, i) => {
+              const row = Math.floor(i / 8);
+              const col = i % 8;
+              const isBlack = (row + col) % 2 === 1;
+              return (
+                <Box key={i} bg={isBlack ? 'gray.600' : 'gray.100'} />
+              );
+            })}
+          </Box>
+        </Box>
+        
+        <Divider />
+        
+        <VStack spacing={6} w="full">
+          <Box 
+            w="full" 
+            p={6} 
+            bg={cardBg} 
+            borderRadius="md" 
+            borderWidth="1px" 
+            borderColor={borderColor}
+            transition="transform 0.3s"
+            _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
+          >
+            <VStack>
+              <Heading size="md">Play Now</Heading>
+              <Button 
+                colorScheme="blue" 
+                size="lg" 
+                w="full"
+                onClick={() => createGame("AI")}
+              >
+                Challenge AI
+              </Button>
+              <Button 
+                colorScheme="green" 
+                size="lg" 
+                w="full"
+                onClick={() => createGame("playerGame")}
+              >
+                Create a Lobby
+              </Button>
+            </VStack>
+          </Box>
+          
+          <Box 
+            w="full" 
+            p={6} 
+            bg={cardBg} 
+            borderRadius="md" 
+            borderWidth="1px" 
+            borderColor={borderColor}
+          >
+            <form onSubmit={joinGame}>
+              <VStack spacing={4}>
+                <Heading size="md">Join Existing Game</Heading>
+                <FormControl>
+                  <FormLabel>Enter Game Code</FormLabel>
+                  <Input 
+                    value={joinCode} 
+                    onChange={(e) => setJoinCode(e.target.value)}
+                    placeholder="Enter code here"
+                  />
+                </FormControl>
+                <Button
+                  colorScheme="teal"
+                  type="submit"
+                  w="full"
+                >
+                  Join Game
+                </Button>
+              </VStack>
+            </form>
+          </Box>
+        </VStack>
+        
+        {joinCode && (
+          <Text>Your game code: <Text as="span" fontWeight="bold">{joinCode}</Text></Text>
+        )}
+      </VStack>
+    </Container>
   );
 }
 
