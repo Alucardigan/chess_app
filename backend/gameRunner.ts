@@ -27,6 +27,7 @@ class GameRunner{
     promotionTarget:PromotionTarget
     playerManager: PlayerManager
     turns: number
+    checkMate : GameColor | undefined //undefined on intialisation, is used to record the WINNER's color
     constructor(){
         this.gameStates = [new BitBoard()]
         this.movegen = new MoveGenerator()
@@ -36,6 +37,7 @@ class GameRunner{
         }
         this.playerManager = new PlayerManager()
         this.turns = 0
+        this.checkMate = undefined
     }
     makeMove(from:number,to:number){
         
@@ -46,14 +48,15 @@ class GameRunner{
         let allMoves = moves | captures
         const newBoard = this.testMove(from,to,allMoves,curBoard)
         this.gameStates.push(newBoard)
-        this.turns +=1 
+        
         if(this.checkForCheck(fpiece < 6 ? 11: 5,newBoard)){
             console.log("CHECK")
             if(this.checkForMate(fpiece<6?11:5,newBoard)){
-                console.log("CHECKMATE")
+                console.log("CHECKMATE",(this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK)
+                this.checkMate = (this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK
             }
-            
         }
+        this.turns +=1 
     }
     testMove(from:number,to:number,moves:bigint,curBoard:BitBoard){
         let resBoard = new BitBoard()
@@ -217,6 +220,7 @@ class GameRunner{
         return true
     }
     getPlayerByTurn(){
+        console.log(this.turns,this.turns%2,this.playerManager.getPlayerByColor(GameColor.WHITE),this.playerManager.players)
         if(this.turns%2==0){
             return this.playerManager.getPlayerByColor(GameColor.WHITE)
         }

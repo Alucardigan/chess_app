@@ -4,9 +4,11 @@ import { GameColor } from "./routeHandlers/helper";
 interface PlayerInfo{
     userName: String
     color: GameColor
+    socketId: String |undefined
 }
 
 class PlayerManager{
+    //userID -> PlayerInfo
     players: Map <String,PlayerInfo>
     takenColors: GameColor[] 
     constructor(){
@@ -20,7 +22,7 @@ class PlayerManager{
             return
         }
         const UID = this.generatePlayerID()
-        this.players.set(UID,{userName:username,color:color})
+        this.players.set(UID,{userName:username,color:color,socketId:undefined})
         this.takenColors.push(color)
         return UID
     }
@@ -38,6 +40,9 @@ class PlayerManager{
             }
         }
         console.log("Couldnt find player by chosen color",color)
+    }
+    getPlayerByID(UID:String){
+        return this.players.get(UID)
     }
 }
 export default PlayerManager;
