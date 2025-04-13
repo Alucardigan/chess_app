@@ -2,9 +2,9 @@ import { randomUUID } from "crypto";
 import { GameColor } from "./routeHandlers/helper";
 
 interface PlayerInfo{
-    userName: String
+    userName: string
     color: GameColor
-    socketId: String |undefined
+    socketId: string |undefined
 }
 
 class PlayerManager{
@@ -15,7 +15,7 @@ class PlayerManager{
         this.players = new Map()
         this.takenColors = []
     }
-    addPlayer(username:String,color:GameColor){
+    addPlayer(username:string,color:GameColor){
         //TODO: Add a way where if color is undefined then player can be assigned whatever color is leftover
         if(color in this.takenColors){
             console.log("Color taken")

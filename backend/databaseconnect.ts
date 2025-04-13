@@ -15,7 +15,7 @@ async function run() {
     await client.close();
   }
 }
-async function createNewUser(db,username){
+async function createNewUser(db:any,username:any){
   const users = db.collection('chessUsers') 
   const query = {'UID': new Date().getTime(),'userName':username}
   const result = await users.insertOne(query)

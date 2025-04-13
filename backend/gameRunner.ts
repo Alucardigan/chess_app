@@ -3,7 +3,7 @@ import { flattenTokens } from "@chakra-ui/react"
 import BitBoard from "./bitboard"
 import MoveGenerator from "./moveGenerator"
 import PlayerManager from "./playerManager"
-import { GameColor } from "./routeHandlers/helper"
+import { ChatMessage, GameColor, GameType } from "./routeHandlers/helper"
 
 interface CastleRookMove {
     flag : Boolean,
@@ -12,7 +12,6 @@ interface CastleRookMove {
     rToMask: bigint,
     kFromMask : bigint,
     kToMask : bigint,
-
     rPieceIdx : number,
     kPieceIdx : number
 }
@@ -20,6 +19,7 @@ interface PromotionTarget{
     white : number,
     black : number
 }
+
 class GameRunner{
     //wanted a class that handles game moves that isnt the bitboard itself
     gameStates: BitBoard[]
@@ -28,7 +28,9 @@ class GameRunner{
     playerManager: PlayerManager
     turns: number
     checkMate : GameColor | undefined //undefined on intialisation, is used to record the WINNER's color
-    constructor(){
+    gameType : GameType
+    gameChat: ChatMessage[]
+    constructor(gameType : GameType){
         this.gameStates = [new BitBoard()]
         this.movegen = new MoveGenerator()
         this.promotionTarget = {
@@ -38,6 +40,8 @@ class GameRunner{
         this.playerManager = new PlayerManager()
         this.turns = 0
         this.checkMate = undefined
+        this.gameType = gameType
+        this.gameChat = []
     }
     makeMove(from:number,to:number){
         
