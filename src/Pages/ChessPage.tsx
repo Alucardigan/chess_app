@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom"
 import ChessBoard from "../Components/Chessboard"
 import { useEffect, useRef, useState } from "react"
 import { Socket, io } from "socket.io-client";
-import Chat from "./Chat";
-import { HStack } from "@chakra-ui/react";
+import Chat from "../Components/Chat";
+import { Box, Flex, HStack } from "@chakra-ui/react";
 interface ChatMessageFormat{
     username : string 
     message : string 
@@ -20,14 +20,16 @@ function ChessPage(){
     const [chatState,setChatState] = useState<string[]>();
     //socketReferences
     const socketRef = useRef<Socket|null>(null)
+    const [isSocketConnected,setIsSocketConnected] = useState(false)
     useEffect(()=>{
         socketRef.current = io('http://localhost:8080')
         socketRef.current.on("connect",()=>{
             console.log('connected to backend',socketRef.current?.id)
             socketRef.current?.emit("joinGame",{gameID,userID: userID})
+            setIsSocketConnected(true)
         })
         socketRef.current.on("receiveGame",(newBoardState:{bitString: string,checkmate: boolean , winner : string })=>{
-            console.log(newBoardState)
+            console.log('new GameState',newBoardState)
             setBoardState(newBoardState.bitString)
         })
         return ()=> {
@@ -44,14 +46,16 @@ function ChessPage(){
     }
     return (
     <div>{gameID}
-            <HStack>
-            <div className="chessboard">
+        <Flex width={"100%"} gap={0}>
+            <Box flex={4} justifyContent={"center"}>
                 <ChessBoard boardState={boardState} onMove={onMove}/>
-            </div>
-            <div className="chatBar">
-                <Chat socketRef={socketRef} userID={userID} gameID={gameID}></Chat>
-            </div>
-        </HStack>
+            </Box>
+                
+            <Box flex={1} width={"200px"}>
+                {!isSocketConnected && <div>Chat is loading</div>}
+                {isSocketConnected && <Chat socketRef={socketRef.current} userID={userID} gameID={gameID}></Chat>}
+            </Box>
+        </Flex>
     </div>
     )
 

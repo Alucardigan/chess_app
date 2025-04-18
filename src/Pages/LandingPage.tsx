@@ -99,40 +99,9 @@ function LandingPage(){
         boxShadow="lg"
       >
         <VStack spacing={2}>
-          <Heading size="xl">Chess Master</Heading>
-          <Text fontSize="lg" color="gray.500">Challenge your mind with the game of kings</Text>
+          <Heading size="xl">Chess Game</Heading>
+          <Text fontSize="lg" color="gray.500">By Thejas </Text>
         </VStack>
-        
-        <Box 
-          w="full" 
-          h="64" 
-          bg="gray.200" 
-          borderRadius="md" 
-          overflow="hidden"
-          position="relative"
-        >
-          {/* Chess board illustration */}
-          <Box 
-            position="absolute" 
-            top="0" 
-            left="0" 
-            right="0" 
-            bottom="0" 
-            bg="gray.300" 
-            display="grid" 
-            gridTemplateColumns="repeat(8, 1fr)" 
-            gridTemplateRows="repeat(8, 1fr)"
-          >
-            {Array(64).fill(0).map((_, i) => {
-              const row = Math.floor(i / 8);
-              const col = i % 8;
-              const isBlack = (row + col) % 2 === 1;
-              return (
-                <Box key={i} bg={isBlack ? 'gray.600' : 'gray.100'} />
-              );
-            })}
-          </Box>
-        </Box>
         
         <Divider />
         

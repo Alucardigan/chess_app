@@ -45,6 +45,7 @@ function ChessBoard({boardState,onMove}:{boardState:string,onMove:(from:number,t
             <SimpleGrid
                 columns={8}
                 spacing={0}
+                width="fit-content"
             >{chessboard.map((s,i)=>{
                 return <Tile key={i} tileKey={i} tileIdx={i} pieceLink={findPieceLink(s)} onMove={onMove}  />
             })
