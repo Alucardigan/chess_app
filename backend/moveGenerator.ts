@@ -128,7 +128,7 @@ class MoveGenerator{
         let allPieces = bitboard.getAllPieces()
         let friendlyPieces = pieceIdx < 6 ? bitboard.getBlackPieces() : bitboard.getWhitePieces()
         // Get the blockers for magic index calculation
-        const blockers = allPieces & this.rookMoveGen.getRookMask(square);
+        const blockers = allPieces & this.rookMoveGen.getAltRookMask(square);
         // Use magic indexing to get all possible moves
         const key = this.rookMoveGen.getMagicIndex(blockers, this.rookMoveGen.magicNumbers[square], this.rookMoveGen.magicShifts[square]);
         const allPossibleMoves = this.rookMoveGen.attackTable[square][key];
