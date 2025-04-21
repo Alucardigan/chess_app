@@ -130,6 +130,7 @@ class MoveGenerator{
         // Get the blockers for magic index calculation
         const blockers = allPieces & this.rookMoveGen.getAltRookMask(square);
         // Use magic indexing to get all possible moves
+        console.log(square,blockers,pieceIdx)
         const key = this.rookMoveGen.getMagicIndex(blockers, this.rookMoveGen.magicNumbers[square], this.rookMoveGen.magicShifts[square]);
         const allPossibleMoves = this.rookMoveGen.attackTable[square][key];
         // Enemy pieces = all pieces EXCEPT friendly pieces (XOR with friendly pieces)

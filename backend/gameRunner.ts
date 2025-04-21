@@ -4,6 +4,7 @@ import BitBoard from "./bitboard"
 import MoveGenerator from "./moveGenerator"
 import PlayerManager from "./playerManager"
 import { ChatMessage, GameColor, GameType } from "./routeHandlers/helper"
+import AIPLayer from "./AIPlayer"
 
 interface CastleRookMove {
     flag : Boolean,
@@ -30,6 +31,7 @@ class GameRunner{
     checkMate : GameColor | undefined //undefined on intialisation, is used to record the WINNER's color
     gameType : GameType
     gameChat: ChatMessage[]
+    AIPlayer: AIPLayer
     constructor(gameType : GameType){
         this.gameStates = [new BitBoard()]
         this.movegen = new MoveGenerator()
@@ -42,6 +44,7 @@ class GameRunner{
         this.checkMate = undefined
         this.gameType = gameType
         this.gameChat = []
+        this.AIPlayer = new AIPLayer
     }
     makeMove(from:number,to:number){
         
@@ -51,6 +54,10 @@ class GameRunner{
         const {moves,captures} = this.movegen.generatePieceMove(from,fpiece,curBoard)
         let allMoves = moves | captures
         const newBoard = this.testMove(from,to,allMoves,curBoard)
+        if(this.checkForCheck(fpiece,newBoard)){
+            console.log("Error: Can't move piece while in check")
+            return
+        }
         this.gameStates.push(newBoard)
         
         if(this.checkForCheck(fpiece < 6 ? 11: 5,newBoard)){
@@ -58,9 +65,15 @@ class GameRunner{
             if(this.checkForMate(fpiece<6?11:5,newBoard)){
                 console.log("CHECKMATE",(this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK)
                 this.checkMate = (this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK
+                this.turns +=1 
+                return 
             }
         }
         this.turns +=1 
+        if(this.gameType===GameType.AI){
+            this.gameStates.push(this.AIPlayer.generateMove(this,fpiece < 6 ? GameColor.WHITE : GameColor.BLACK))
+            this.turns += 1
+        }
     }
     testMove(from:number,to:number,moves:bigint,curBoard:BitBoard){
         let resBoard = new BitBoard()
