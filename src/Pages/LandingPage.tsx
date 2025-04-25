@@ -38,6 +38,7 @@ function LandingPage(){
     const gameID = data.gameID
     const userID = data.userID
     sessionStorage.setItem("chessGameUserID",userID)
+    sessionStorage.setItem("chessGameGameColor","white")
     console.log(`/game/${gameID}`,data)
     navigator(`/game/${gameID}`)
   }
@@ -60,6 +61,7 @@ function LandingPage(){
     const gameID = data.gameID
     const userID = data.userID
     sessionStorage.setItem("chessGameUserID",userID)
+    sessionStorage.setItem("chessGameGameColor","black")
     console.log(`/game/${gameID}`,data)
     navigator(`/game/${gameID}`)
   }

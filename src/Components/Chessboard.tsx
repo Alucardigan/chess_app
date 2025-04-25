@@ -31,15 +31,9 @@ type Piece = {
     imageLink: string,
     alias:string
 }
-type selectPiece = {
-    alias:string|null,
-    fromTile:number|null,
-    toTile:number|null
-
-}
-function ChessBoard({boardState,onMove}:{boardState:string,onMove:(from:number,to:number)=>void}){
+function ChessBoard({boardState,isWhite, onMove}:{boardState:string,isWhite: boolean,onMove:(from:number,to:number)=>void}){
     //setup board
-    const chessboard = boardState.split('')
+    const chessboard = isWhite ? boardState.split('') : boardState.split('').reverse()
     
     return (
         <div>

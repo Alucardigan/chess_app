@@ -22,6 +22,7 @@ function ChessPage(){
     const [boardState,setBoardState] = useState<string>("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR")
     const [chatState,setChatState] = useState<string[]>();
     const winnerRef = useRef<string>("");
+    const [isWhite, setIsWhite] = useState(sessionStorage.getItem("chessGameGameColor")==="white"?true:false);
     //socketReferences
     const socketRef = useRef<Socket|null>(null)
     const [isSocketConnected,setIsSocketConnected] = useState(false)
@@ -63,7 +64,7 @@ function ChessPage(){
     <div>{gameID}
         <Flex width={"100%"} gap={0}>
             <Box flex={4} justifyContent={"center"}>
-                <ChessBoard boardState={boardState} onMove={onMove}/>
+                <ChessBoard boardState={boardState} isWhite= {isWhite}onMove={onMove}/>
             </Box>
             <CheckmateDialogBox isOpen = {isOpen} onClose={goHome} winner={winnerRef.current}/>
             <Box flex={1} width={"200px"}>
