@@ -32,6 +32,7 @@ class GameRunner{
     gameType : GameType
     gameChat: ChatMessage[]
     AIPlayer: AIPLayer
+    staleMate : boolean
     constructor(gameType : GameType){
         this.gameStates = [new BitBoard()]
         this.movegen = new MoveGenerator()
@@ -45,6 +46,7 @@ class GameRunner{
         this.gameType = gameType
         this.gameChat = []
         this.AIPlayer = new AIPLayer
+        this.staleMate = false
     }
     makeMove(from:number,to:number){
         
@@ -66,6 +68,12 @@ class GameRunner{
                 this.turns +=1 
                 return 
             }
+        }
+        if(this.checkForStalemate(fpiece < 6 ? 11: 5,newBoard)){
+            console.log("STALEMATE DETECTED")
+            this.staleMate = true; 
+            this.turns +=1;
+            return
         }
         this.turns +=1 
         if(this.gameType===GameType.AI){
@@ -230,6 +238,33 @@ class GameRunner{
             }
         }
         return true
+    }
+    checkForStalemate(pieceIdx:number,bitboard:BitBoard){
+        const king = bitboard.boardState[pieceIdx < 6 ? 5:11]
+        let opposiingColorIdx = pieceIdx < 6 ? 0: 6 //get the opposing color's pawn index  
+        //check if we are in check 
+        if(this.checkForCheck(pieceIdx < 6 ? 5:11,bitboard) === false){
+            for(let i = opposiingColorIdx; i < opposiingColorIdx+6; i++){
+                let pieces = bitboard.boardState[i]
+                while(pieces != 0n){
+                    const square = Number(pieces & -pieces).toString(2).length - 1
+    
+                    const {moves,captures } = this.movegen.generatePieceMove(square,i,bitboard) 
+                    let allMoves = moves | captures
+                    while(allMoves != 0n){
+                        const moveSquare = Number(allMoves & -allMoves).toString(2).length - 1
+                        const newBoard = this.testMove(square,moveSquare,allMoves,bitboard)
+                        if(!(this.checkForCheck(pieceIdx < 6 ? 5:11,newBoard))){
+                            return false
+                        }
+                        allMoves &= allMoves -1n
+                    }
+                    pieces &= pieces -1n
+                }
+            }
+            return true
+        }
+        return false;
     }
     getPlayerByTurn(){
         

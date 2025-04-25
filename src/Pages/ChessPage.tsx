@@ -4,12 +4,10 @@ import ChessBoard from "../Components/Chessboard"
 import { useEffect, useRef, useState } from "react"
 import { Socket, io } from "socket.io-client";
 import Chat from "../Components/Chat";
-import { Box, Button, Flex, HStack, useDisclosure,useToast } from "@chakra-ui/react";
+import { Box, Button, Flex, useDisclosure,useToast } from "@chakra-ui/react";
 import CheckmateDialogBox from "../Components/CheckmateDialogBox";
-interface ChatMessageFormat{
-    username : string 
-    message : string 
-}
+import StalemateDialogBox from "../Components/StalemateDialogBox";
+
 function ChessPage(){
     //get the game state from game ID via request to backend
     const {gameID} = useParams()
@@ -18,9 +16,10 @@ function ChessPage(){
         console.log("ERROR: userID doesnt exist")
     }
     const navigator = useNavigate()
-    const { isOpen, onOpen, onClose } = useDisclosure()
+
+    const { isOpen: isCheckmateOpen, onOpen: onOpenCheckmate, onClose: onCloseCheckmate } = useDisclosure()
+    const { isOpen: isStalemateOpen, onOpen: onOpenStalemate, onClose: onCloseStalemate } = useDisclosure()
     const [boardState,setBoardState] = useState<string>("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR")
-    const [chatState,setChatState] = useState<string[]>();
     const winnerRef = useRef<string>("");
     const [isWhite, setIsWhite] = useState(sessionStorage.getItem("chessGameGameColor")==="white"?true:false);
     //socketReferences
@@ -34,11 +33,15 @@ function ChessPage(){
             socketRef.current?.emit("joinGame",{gameID,userID: userID})
             setIsSocketConnected(true)
         })
-        socketRef.current.on("receiveGame",(newBoardState:{bitString: string,checkmate: boolean , winner : string })=>{
+        socketRef.current.on("receiveGame",(newBoardState:{bitString: string,checkmate: boolean , stalemate : boolean ,winner : string , })=>{
             setBoardState(newBoardState.bitString)
+            if(newBoardState.stalemate){
+                console.log("Stalemate is on")
+                onOpenStalemate()
+            }
             if(newBoardState.checkmate===true){
                 winnerRef.current = newBoardState.winner
-                onOpen()
+                onOpenCheckmate()
             }
         })
         socketRef.current.on("receiveError",(title:string,message:string)=>{
@@ -77,7 +80,9 @@ function ChessPage(){
             <Box flex={4} justifyContent={"center"}>
                 <ChessBoard boardState={boardState} isWhite= {isWhite}onMove={onMove}/>
             </Box>
-            <CheckmateDialogBox isOpen = {isOpen} onClose={goHome} winner={winnerRef.current}/>
+            <Button onClick={onOpenStalemate}>Stalemate</Button>
+            <CheckmateDialogBox isOpen = {isCheckmateOpen} onClose={goHome} winner={winnerRef.current}/>
+            <StalemateDialogBox isOpen = {isStalemateOpen} onClose={goHome}/>
             <Box flex={1} width={"200px"}>
                 {!isSocketConnected && <div>Chat is loading</div>}
                 {isSocketConnected && <Chat socketRef={socketRef.current} userID={userID} gameID={gameID}></Chat>}

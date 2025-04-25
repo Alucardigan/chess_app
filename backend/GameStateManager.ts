@@ -3,6 +3,7 @@ import activeMatches, { GameColor, GameStateException } from "./routeHandlers/he
 interface GameEvent {
     bitString : string
     checkmate : boolean
+    stalemate : boolean
     winner : string | undefined
 
 }
@@ -44,7 +45,8 @@ class GameStateManager{
         let gameEvent: GameEvent = {
             bitString : bitString,
             checkmate : game.checkMate === undefined ? false : true,
-            winner : game.checkMate === undefined ? undefined : game.checkMate === GameColor.WHITE ? "White" : "Black"
+            winner : game.checkMate === undefined ? undefined : game.checkMate === GameColor.WHITE ? "White" : "Black",
+            stalemate : game.staleMate
         }
         return gameEvent
     }

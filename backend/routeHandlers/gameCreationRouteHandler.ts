@@ -1,7 +1,6 @@
 
-import {Request,Response,NextFunction,Errback} from 'express';
+import {Request,Response} from 'express';
 import activeMatches, { GameColor, GameType } from './helper';
-import BitBoard from '../bitboard';
 import GameRunner from '../gameRunner';
 
 

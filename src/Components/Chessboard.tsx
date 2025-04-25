@@ -1,7 +1,5 @@
-import { Box, Image, SimpleGrid } from "@chakra-ui/react"
-import { useEffect, useRef, useState } from "react"
+import { SimpleGrid } from "@chakra-ui/react"
 import Tile from "./Tile"
-import CheckmateDialogBox from "./CheckmateDialogBox"
 
 
 const Pieces:Piece[] = [

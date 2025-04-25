@@ -1,7 +1,5 @@
 import bishopMagicGenerator from "./bishopMagicGen";
 import BitBoard from "./bitboard";
-import GameRunner from "./gameRunner";
-import {BISHOP_MAGIC_NUMBERS} from "./magic"
 import RookMagicGenerator from "./rookMagicGen";
 
 interface Response {

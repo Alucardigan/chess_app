@@ -1,6 +1,6 @@
 import { VStack,Text, HStack, Input, Button, Flex, Box } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { Socket, io } from "socket.io-client";
+import { Socket } from "socket.io-client";
 interface ChatProps{
     socketRef : Socket| null,
     gameID: string|undefined, 

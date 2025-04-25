@@ -1,12 +1,12 @@
 // imports
 const express = require('express');
 const cors = require('cors');
-import {Request,Response,NextFunction,Errback} from 'express';
+import {Request,Response,NextFunction} from 'express';
 
 import activeMatches, { ChatMessage, GameStateException } from './routeHandlers/helper';
 import GameStateManager from './GameStateManager';
 const gameCreator = require('./routes/gameCreationRoutes')
-const { Server, Socket } = require("socket.io");
+const { Server } = require("socket.io");
 
 const {createServer} =require('http')
 //intialisation
