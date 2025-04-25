@@ -2,7 +2,7 @@ import activeMatches, { GameColor } from "./routeHandlers/helper";
 
 interface GameEvent {
     bitString : String
-    checkMate : boolean
+    checkmate : boolean
     winner : GameColor | undefined
 
 }
@@ -45,7 +45,7 @@ class GameStateManager{
         bitString = bitString.split("").reverse().join("")
         let gameEvent: GameEvent = {
             bitString : bitString,
-            checkMate : game.checkMate === undefined ? false : true,
+            checkmate : game.checkMate === undefined ? false : true,
             winner : game.checkMate
         }
         return gameEvent
