@@ -51,6 +51,9 @@ io.on("connection", (socket:any) => {
     activeMatches.get(gameID)?.playerManager.players.set(userID,updatedPlayerInfo)
     socket.join(gameID);
     console.log(`Player ${userID} joined room ${gameID}`)
+    let gameEvent = GameStateManager.exportEventToSocket(gameID)
+    console.log(gameEvent)
+    io.to(gameID).emit('receiveGame',gameEvent)
   })
   socket.on('movePiece',({gameID,userID,from,to}:{gameID:number,userID: String,from:number,to:number})=>{
     console.log('move piece',gameID,userID)
