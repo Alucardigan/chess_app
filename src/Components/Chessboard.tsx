@@ -42,7 +42,8 @@ function ChessBoard({boardState,isWhite, onMove}:{boardState:string,isWhite: boo
                 spacing={0}
                 width="fit-content"
             >{chessboard.map((s,i)=>{
-                return <Tile key={i} tileKey={i} tileIdx={i} pieceLink={findPieceLink(s)} onMove={onMove}  />
+                return <Tile key={isWhite ? i : 63 - i } tileKey={isWhite ? i : 63 - i} tileIdx={isWhite ? i : 63 - i} 
+                pieceLink={findPieceLink(s)} onMove={onMove}  />
             })
             }
             </SimpleGrid>

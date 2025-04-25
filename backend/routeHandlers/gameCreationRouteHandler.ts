@@ -35,7 +35,6 @@ async function joinPlayerGame(req:Request,res:Response){
     activeMatches.set(Number(uniqueID),gameRunner)
 
     res.status(200).json({'gameID':uniqueID,'userID':userID})
-    console.log("Joining a new player game",uniqueID)
 }
 
 

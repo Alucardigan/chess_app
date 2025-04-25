@@ -1,4 +1,4 @@
-import activeMatches, { GameColor } from "./routeHandlers/helper";
+import activeMatches, { GameColor, GameStateException } from "./routeHandlers/helper";
 
 interface GameEvent {
     bitString : string
@@ -6,26 +6,24 @@ interface GameEvent {
     winner : string | undefined
 
 }
+
 class GameStateManager{
     static handleMove(gameID:number,userID:String , from:number,to:number){
         const game = activeMatches.get(Number(gameID))//unsure why type casting is required here but it is 
         if(!game){
-            console.log('cannot find bitboard')
-            return ''
+            throw new GameStateException("404 Game", "HIGH", "Game can't be found")
         }
         let userWhoseTurnItIs= game.getPlayerByTurn()
         if(!userWhoseTurnItIs){
-            console.log("User cannot be found")
-            let bitString =game.gameStates[game.gameStates.length-1].convertToString()
-            return bitString?.split("").reverse().join("")
-            
+
+            throw new GameStateException("404 User", "HIGH", "User can't be found")
         }
-        console.log(userWhoseTurnItIs,userID)
         if(userWhoseTurnItIs!==userID){
-            console.log("Incorrect user: Blocked")
-            let bitString =game.gameStates[game.gameStates.length-1].convertToString()
-            return bitString?.split("").reverse().join("")
-            
+            throw new GameStateException("400 Incorrect User", "LOW", "It's not your turn")
+        }
+        if(game.getColorByTurn()!==game.getPieceColorByPosition(from)){
+
+            throw new GameStateException("400 Wrong Piece", "LOW", "Thats not your piece")
         }
         game?.makeMove(from,to)
     }
@@ -40,7 +38,7 @@ class GameStateManager{
         let bitString = game.gameStates[game.gameStates.length-1].convertToString()
         if(!bitString){
             console.log("INVALID GAME STATE STRING",bitString)
-            return 
+            return ''
         }
         bitString = bitString.split("").reverse().join("")
         let gameEvent: GameEvent = {

@@ -47,7 +47,6 @@ class RookMagicGenerator {
                 this.magicNumbers[square] = 0n; // Fallback (shouldn't happen with good masks)
             }
         }
-        console.log("Magic Numbers:", this.magicNumbers);
     }
 
     generateRookMoves() {

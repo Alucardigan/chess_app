@@ -14,5 +14,13 @@ export interface ChatMessage{
     username: string|GameColor|undefined ,
     chatMessage: string
 }
-
+export class GameStateException extends Error{
+    title : string
+    priority: string
+    constructor(title:string,priority:string ,message:string){
+        super(message)
+        this.title = title
+        this.priority = priority
+    }
+}
 export default activeMatches

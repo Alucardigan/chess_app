@@ -4,7 +4,7 @@ import ChessBoard from "../Components/Chessboard"
 import { useEffect, useRef, useState } from "react"
 import { Socket, io } from "socket.io-client";
 import Chat from "../Components/Chat";
-import { Box, Flex, HStack, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, useDisclosure,useToast } from "@chakra-ui/react";
 import CheckmateDialogBox from "../Components/CheckmateDialogBox";
 interface ChatMessageFormat{
     username : string 
@@ -26,6 +26,7 @@ function ChessPage(){
     //socketReferences
     const socketRef = useRef<Socket|null>(null)
     const [isSocketConnected,setIsSocketConnected] = useState(false)
+    const toast = useToast()
     useEffect(()=>{
         socketRef.current = io('http://localhost:8080')
         socketRef.current.on("connect",()=>{
@@ -34,19 +35,17 @@ function ChessPage(){
             setIsSocketConnected(true)
         })
         socketRef.current.on("receiveGame",(newBoardState:{bitString: string,checkmate: boolean , winner : string })=>{
-            console.log('new GameState',newBoardState,newBoardState.checkmate)
             setBoardState(newBoardState.bitString)
-            
             if(newBoardState.checkmate===true){
-
                 winnerRef.current = newBoardState.winner
                 onOpen()
-                console.log("isopen",isOpen)
             }
+        })
+        socketRef.current.on("receiveError",(title:string,message:string)=>{
+            onError(title,message)
         })
         return ()=> {
             socketRef.current?.disconnect()
-            console.log('disconnected')
         };
     },[])
     //socket events 
@@ -56,12 +55,24 @@ function ChessPage(){
             socketRef.current.emit('movePiece',{gameID,userID: userID,from,to})
         }
     }
+    const onError= (title:string,description:string) =>{
+        
+        toast({
+        title: title,
+        description: description,
+        status: 'error',
+        duration: 2500,
+        isClosable: true,
+        })
+    }
     //game over events
     const goHome = () =>{
         navigator("/")
     }
+
     return (
     <div>{gameID}
+        
         <Flex width={"100%"} gap={0}>
             <Box flex={4} justifyContent={"center"}>
                 <ChessBoard boardState={boardState} isWhite= {isWhite}onMove={onMove}/>

@@ -16,7 +16,6 @@ function Tile({tileIdx,tileKey,pieceLink,onMove}:TileProps){
     const drop = (e:React.DragEvent)=>{
         e.preventDefault()
         const data = e.dataTransfer.getData("text/plain")
-        console.log(data,tileKey)
         onMove(Number(data),tileKey)
     }
     return (

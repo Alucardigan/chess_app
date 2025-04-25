@@ -3,7 +3,7 @@ import { flattenTokens } from "@chakra-ui/react"
 import BitBoard from "./bitboard"
 import MoveGenerator from "./moveGenerator"
 import PlayerManager from "./playerManager"
-import { ChatMessage, GameColor, GameType } from "./routeHandlers/helper"
+import { ChatMessage, GameColor, GameStateException, GameType } from "./routeHandlers/helper"
 import AIPLayer from "./AIPlayer"
 
 interface CastleRookMove {
@@ -55,13 +55,11 @@ class GameRunner{
         let allMoves = moves | captures
         const newBoard = this.testMove(from,to,allMoves,curBoard)
         if(this.checkForCheck(fpiece,newBoard)){
-            console.log("Error: Can't move piece while in check")
-            return
+            throw new GameStateException("405 In Check","LOW", "Can't move piece while in check")
         }
         this.gameStates.push(newBoard)
         
         if(this.checkForCheck(fpiece < 6 ? 11: 5,newBoard)){
-            console.log("CHECK")
             if(this.checkForMate(fpiece<6?11:5,newBoard)){
                 console.log("CHECKMATE",(this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK)
                 this.checkMate = (this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK
@@ -144,11 +142,10 @@ class GameRunner{
         let key = from * 100 + to
         let castlingMove = castles[key]
         if(castlingMove === undefined){
-            console.log("Failed check")
             return newBoard
         }
         if(castlingMove.kFromMask ===  prevBoard.boardState[pieceIdx] && castlingMove.kToMask === newBoard.boardState[pieceIdx]){
-            console.log("castling success")
+
             newBoard.boardState[castlingMove.rPieceIdx] &= ~castlingMove.rFromMask
             newBoard.boardState[castlingMove.rPieceIdx] |= castlingMove.rToMask 
         }
@@ -162,7 +159,7 @@ class GameRunner{
             let pawns = newBoard.boardState[PAWN_IDX];
             pawns &= targetRow
             if(pawns===0n){
-                console.log('no pawns to promote')
+                //no pawns to promote
                 return newBoard
             }
             newBoard.boardState[PAWN_IDX] &= ~pawns
@@ -175,7 +172,7 @@ class GameRunner{
             let pawns = newBoard.boardState[PAWN_IDX];
             pawns &= targetRow
             if(pawns===0n){
-                console.log('no pawns to promote')
+                //no pawns to promote
                 return newBoard
             }
             newBoard.boardState[PAWN_IDX] &= ~pawns
@@ -208,11 +205,9 @@ class GameRunner{
 
     checkForMate(pieceIdx:number,bitboard:BitBoard):Boolean{
         const king = bitboard.boardState[pieceIdx < 6 ? 5:11]
-        const kingSquare = Math.floor(Math.log2(Number(king)))
         let opposiingColorIdx = pieceIdx < 6 ? 0: 6 //get the opposing color's pawn index  
         //check if we are in check 
         if(this.checkForCheck(pieceIdx < 6 ? 5:11,bitboard) === false){
-            console.log('we are not in check')
             return false
         }
         for(let i = opposiingColorIdx; i < opposiingColorIdx+6; i++){
@@ -237,11 +232,15 @@ class GameRunner{
         return true
     }
     getPlayerByTurn(){
-        console.log(this.turns,this.turns%2,this.playerManager.getPlayerByColor(GameColor.WHITE),this.playerManager.players)
-        if(this.turns%2==0){
-            return this.playerManager.getPlayerByColor(GameColor.WHITE)
-        }
-        return this.playerManager.getPlayerByColor(GameColor.BLACK)
+        
+        return this.playerManager.getPlayerByColor(this.getColorByTurn())
+    }
+    getColorByTurn(){
+        
+        return this.turns%2===0 ? GameColor.WHITE : GameColor.BLACK
+    }
+    getPieceColorByPosition(position:number){
+        return this.gameStates[this.gameStates.length-1].determinePieceIdx(position)<6? GameColor.BLACK : GameColor.WHITE 
     }
 }
 export default GameRunner

@@ -32,7 +32,6 @@ function Chat({socketRef, gameID, userID}:ChatProps){
             return 
         }
         const handleReceiveChatMessage = (newChatState:{chatMessages: ChatMessageFormat[]})=>{
-            console.log("client received message",newChatState)
             setChatState(newChatState.chatMessages)
         }
         socketRef?.on("receiveChatMessage",handleReceiveChatMessage)
@@ -46,7 +45,6 @@ function Chat({socketRef, gameID, userID}:ChatProps){
         }
     },[socketRef])
     const onSendMessage=(message:String)=>{
-        console.log("SENT MESSAGE")
         socketRef?.emit("sendChatMessage",{gameID,userID,message})
         setCurrentMessage("")
     }

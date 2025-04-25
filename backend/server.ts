@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 import {Request,Response,NextFunction,Errback} from 'express';
 
-import activeMatches, { ChatMessage } from './routeHandlers/helper';
+import activeMatches, { ChatMessage, GameStateException } from './routeHandlers/helper';
 import GameStateManager from './GameStateManager';
 const gameCreator = require('./routes/gameCreationRoutes')
 const { Server, Socket } = require("socket.io");
@@ -43,7 +43,6 @@ io.on("connection", (socket:any) => {
   socket.on('joinGame',({gameID,userID}:{gameID:number,userID:String})=>{
     let updatedPlayerInfo = activeMatches.get(Number(gameID))?.playerManager.getPlayerByID(String(userID))
     if(!updatedPlayerInfo){
-      console.log(activeMatches,userID,activeMatches.get(Number(gameID))?.playerManager.players)
       console.log("Player not found")
       return
     }
@@ -52,27 +51,31 @@ io.on("connection", (socket:any) => {
     socket.join(gameID);
     console.log(`Player ${userID} joined room ${gameID}`)
     let gameEvent = GameStateManager.exportEventToSocket(gameID)
-    console.log(gameEvent)
     io.to(gameID).emit('receiveGame',gameEvent)
   })
   socket.on('movePiece',({gameID,userID,from,to}:{gameID:number,userID: String,from:number,to:number})=>{
-    console.log('move piece',gameID,userID)
-    GameStateManager.handleMove(gameID,userID,from,to)
+    try{
+      GameStateManager.handleMove(gameID,userID,from,to)
+    }catch(error){
+      if(error instanceof GameStateException){
+        console.log(error.priority,error.title,error.message)
+        io.to(gameID).emit("receiveError",error.title,error.message)
+
+      }
+    }
+
     let gameEvent = GameStateManager.exportEventToSocket(gameID)
-    console.log(gameEvent)
     io.to(gameID).emit('receiveGame',gameEvent)
   })
   //chat events 
   socket.on('sendChatMessage',({gameID,userID,message}:{gameID:number,userID:string, message:string})=>{
     let game= activeMatches.get(Number(gameID))
-    console.log("Server received message",message)
     let player= game?.playerManager.getPlayerByID(userID)
     if(!player){
       console.log("ERROR: Player doenst belong to this game/cant be found")
     }
     const messageObj:ChatMessage = {username : player?.userName ? player.userName : player?.color, chatMessage : message}
     game?.gameChat.push(messageObj)
-    console.log(game?.gameChat)
 
     io.to(gameID).emit('receiveChatMessage',{chatMessages: game?.gameChat})
   })

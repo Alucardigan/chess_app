@@ -37,7 +37,6 @@ class AIPLayer{
     */
     generateMove(gameRunner: GameRunner,gameColor: GameColor){
         let gameState = gameRunner.gameStates[gameRunner.gameStates.length-1]
-        console.log(gameState,gameRunner.gameStates)
         let startingIdx = gameColor === GameColor.BLACK ? 0 : 6;
         let moves:any = []
         for(let i = startingIdx; i < startingIdx+6; i++){
