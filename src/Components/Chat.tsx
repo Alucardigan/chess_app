@@ -61,7 +61,10 @@ function Chat({socketRef, gameID, userID}:ChatProps){
             </Box>
             <Box mt={"auto"}>
                 <HStack p={3} bg="gray.100" borderRadius={"md"}>
-                    <Input value={currentMessage} bg="white" placeholder="Enter your text" onKeyUp={(e)=>{if(e.key=='Enter'){onSendMessage(currentMessage)}}} onChange={(e)=>{setCurrentMessage(e.currentTarget.value)}} />
+                    <Input value={currentMessage} bg="white" placeholder="Enter your text" 
+                    onKeyUp={(e)=>{if(e.key=='Enter'){onSendMessage(currentMessage)}}} 
+                    onChange={(e)=>{setCurrentMessage(e.currentTarget.value)}} 
+                    />
                     <Button colorScheme="blue"  onClick={()=>onSendMessage(currentMessage)}>Send</Button>
                 </HStack>
             </Box>
