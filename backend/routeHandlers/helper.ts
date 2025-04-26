@@ -1,4 +1,3 @@
-import BitBoard from "backend/bitboard"
 import GameRunner from "backend/gameRunner"
 
 let activeMatches = new Map<number,GameRunner>()
@@ -23,4 +22,19 @@ export class GameStateException extends Error{
         this.priority = priority
     }
 }
+export interface CastleRookMove {
+    flag : Boolean,
+    nflag : Boolean,
+    rFromMask: bigint,
+    rToMask: bigint,
+    kFromMask : bigint,
+    kToMask : bigint,
+    rPieceIdx : number,
+    kPieceIdx : number
+}
+export interface PromotionTarget{
+    white : number,
+    black : number
+}
+
 export default activeMatches
