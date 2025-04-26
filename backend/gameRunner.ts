@@ -62,7 +62,7 @@ class GameRunner{
         }
         this.turns +=1 
         if(this.gameType===GameType.AI){
-            this.gameStates.push(this.AIPlayer.generateMove(this,fpiece < 6 ? GameColor.WHITE : GameColor.BLACK))
+            this.gameStates.push(this.AIPlayer.makeMove(this,fpiece < 6 ? GameColor.WHITE : GameColor.BLACK))
             this.turns += 1
         }
     }
