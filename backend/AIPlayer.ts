@@ -19,18 +19,18 @@ class AIPLayer{
     constructor(){
         this.difficulty = Difficulty.MEDIUM 
         this.pointAllocation = new Map()
-        this.pointAllocation.set(0,10)
-        this.pointAllocation.set(1,50)       
-        this.pointAllocation.set(2,30)
-        this.pointAllocation.set(3,30)
-        this.pointAllocation.set(4,90)
-        this.pointAllocation.set(5,900)
-        this.pointAllocation.set(6,-10)
-        this.pointAllocation.set(7,-50)
-        this.pointAllocation.set(8,-30)
-        this.pointAllocation.set(9,-30)
-        this.pointAllocation.set(10,-90)
-        this.pointAllocation.set(11,-900)
+        this.pointAllocation.set(0,-10)
+        this.pointAllocation.set(1,-50)       
+        this.pointAllocation.set(2,-30)
+        this.pointAllocation.set(3,-30)
+        this.pointAllocation.set(4,-90)
+        this.pointAllocation.set(5,-900)
+        this.pointAllocation.set(6,10)
+        this.pointAllocation.set(7,50)
+        this.pointAllocation.set(8,30)
+        this.pointAllocation.set(9,30)
+        this.pointAllocation.set(10,90)
+        this.pointAllocation.set(11,900)
         this.moveGenerator  = new MoveGenerator()
         this.promotionTarget = {
             white : 10,
@@ -40,6 +40,8 @@ class AIPLayer{
 
     }
     makeMove(gameRunner:GameRunner,gameColor:GameColor){
+        let alpha = -Infinity;
+        let beta = Infinity
         if(this.difficulty===Difficulty.MEDIUM){
             console.log("MINIMAX TIME")
             let curBoard = gameRunner.gameStates[gameRunner.gameStates.length-1]
@@ -49,9 +51,9 @@ class AIPLayer{
                 return curBoard
             }
             let bestMove = possibleMoves[0]
-            let bestMoveEval = this.MiniMax(bestMove,this.getOppositeColor(gameColor),this.depth)
+            let bestMoveEval = this.MiniMax(bestMove,this.getOppositeColor(gameColor),this.depth,alpha,beta)
             for(let i = 1 ; i < possibleMoves.length;i ++){
-                let posMoveEval =this.MiniMax(possibleMoves[i],this.getOppositeColor(gameColor),this.depth)
+                let posMoveEval =this.MiniMax(possibleMoves[i],this.getOppositeColor(gameColor),this.depth,alpha,beta)
                 if(gameColor===GameColor.WHITE &&bestMoveEval < posMoveEval){
                     bestMove = possibleMoves[i]
                     bestMoveEval = posMoveEval
@@ -61,6 +63,7 @@ class AIPLayer{
                     bestMoveEval = posMoveEval
                 }
             }
+            console.log(bestMoveEval)
             return bestMove
 
         }
@@ -106,7 +109,7 @@ class AIPLayer{
         }
         return evaluation
     }
-    MiniMax(gameBoard: BitBoard, gameColor: GameColor,depth: number){
+    MiniMax(gameBoard: BitBoard, gameColor: GameColor,depth: number,alpha:number,beta:number){
         
         if(depth===0){
             return this.evalFunction(gameBoard)
@@ -115,10 +118,19 @@ class AIPLayer{
         let possibleMoves = this.generateMoves(gameBoard,gameColor)
         for(let i = 0; i < possibleMoves.length; i ++){
             if(gameColor===GameColor.WHITE){
-                evaluation = Math.max(evaluation,this.MiniMax(possibleMoves[i],GameColor.BLACK,depth -1))
+                evaluation = Math.max(evaluation,this.MiniMax(possibleMoves[i],GameColor.BLACK,depth -1,alpha,beta))
+                alpha = Math.max(alpha,evaluation)
+                if(alpha >= beta){
+                    break;
+                }
             }
             else{
-                evaluation = Math.min(evaluation,this.MiniMax(possibleMoves[i],GameColor.WHITE,depth -1))
+                evaluation = Math.min(evaluation,this.MiniMax(possibleMoves[i],GameColor.WHITE,depth -1,alpha,beta))
+                beta = Math.min(beta,evaluation)
+                if(beta <= alpha){
+                    break;
+                }
+
             }
         }
         return evaluation

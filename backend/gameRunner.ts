@@ -62,7 +62,23 @@ class GameRunner{
         }
         this.turns +=1 
         if(this.gameType===GameType.AI){
-            this.gameStates.push(this.AIPlayer.makeMove(this,fpiece < 6 ? GameColor.WHITE : GameColor.BLACK))
+            let AIMove = this.AIPlayer.makeMove(this,fpiece < 6 ? GameColor.WHITE : GameColor.BLACK)
+            this.gameStates.push(AIMove)
+            if(GameRuleValidator.checkForCheck(fpiece < 6 ? 5: 11,AIMove,this.movegen)){
+                
+                if(GameRuleValidator.checkForMate(fpiece<6?5:11,AIMove,this.promotionTarget,this.movegen)){
+                    console.log("CHECKMATE",(this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK)
+                    this.checkMate = (this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK
+                    this.turns +=1 
+                    return 
+                }
+                if(GameRuleValidator.checkForStalemate(fpiece < 6 ? 5: 11,AIMove,this.promotionTarget,this.movegen)){
+                    console.log("STALEMATE DETECTED")
+                    this.staleMate = true; 
+                    this.turns +=1;
+                    return
+                }
+            }
             this.turns += 1
         }
     }
