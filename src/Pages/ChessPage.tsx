@@ -35,6 +35,7 @@ function ChessPage(){
         })
         socketRef.current.on("receiveGame",(newBoardState:{bitString: string,checkmate: boolean , stalemate : boolean ,winner : string , })=>{
             setBoardState(newBoardState.bitString)
+            console.log(newBoardState.bitString)
             if(newBoardState.stalemate){
                 console.log("Stalemate is on")
                 onOpenStalemate()

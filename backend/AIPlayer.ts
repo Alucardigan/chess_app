@@ -43,7 +43,6 @@ class AIPLayer{
         let alpha = -Infinity;
         let beta = Infinity
         if(this.difficulty===Difficulty.MEDIUM){
-            console.log("MINIMAX TIME")
             let curBoard = gameRunner.gameStates[gameRunner.gameStates.length-1]
             let possibleMoves = this.generateMoves(curBoard,gameColor)
             if(!possibleMoves.length){
@@ -63,7 +62,6 @@ class AIPLayer{
                     bestMoveEval = posMoveEval
                 }
             }
-            console.log(bestMoveEval)
             return bestMove
 
         }

@@ -94,5 +94,45 @@ class GameRunner{
     getPieceColorByPosition(position:number){
         return this.gameStates[this.gameStates.length-1].determinePieceIdx(position)<6? GameColor.BLACK : GameColor.WHITE 
     }
+    convertToFen(gameRunner: GameRunner){
+        let gameState = gameRunner.gameStates[gameRunner.gameStates.length-1]
+        let bitString = gameState.convertToString()
+        let charArr:string[] = []
+        let count = 0
+        for(let i = 0; i< bitString.length; i++){
+            if(i%8===0 && i != 0){
+                if(count>0){
+                    charArr.push(String(count))
+                    count = 0
+                }
+                charArr.push("/")
+            }
+            if(bitString[i]==="0"){
+                count +=1
+            }
+            else{
+                if(count>0){
+                    charArr.push(String(count))
+                    count = 0
+                }
+                charArr.push(bitString[i])
+            }
+        }
+        charArr.reverse()
+        charArr.push(gameRunner.getColorByTurn()===GameColor.WHITE ? " w " : " b " )
+        charArr.push(gameState.WHITE_KING_SIDE_CASTLE ? "K" : "")
+
+        charArr.push(gameState.WHITE_QUEEN_SIDE_CASTLE ? "Q" : "")
+
+        charArr.push(gameState.BLACK_KING_SIDE_CASTLE ? "k" : "")
+
+        charArr.push(gameState.BLACK_QUEEN_SIDE_CASTLE ? "q" : "")
+        charArr.push(" - ")
+        charArr.push(String(1)+" ")
+        charArr.push(String(gameRunner.turns+1))
+        
+        return charArr.join("")
+
+    }
 }
 export default GameRunner

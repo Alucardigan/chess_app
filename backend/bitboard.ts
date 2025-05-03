@@ -81,7 +81,7 @@ class BitBoard{
     printBit(bit:BigInt){
         console.log(bit.toString(2).padStart(64,'0'))
     }
-    convertToString(){
+    convertToString():string{
         let translationMap = new Map<number,string>([
             [0,'p'],[1,'r'],[2,'n'],[3,'b'],[4,'q'],[5,'k'],[6,'P'],[7,'R'],[8,'N'],[9,'B'],[10,'Q'],[11,'K']
         ]);
@@ -91,7 +91,7 @@ class BitBoard{
             const pieceAlias = translationMap.get(i)
             if(!pieceAlias){
                 console.log('invalid alias')
-                return
+                throw Error("Invalid alias in string conversion")
             }
             pieceString = pieceString.replaceAll('1',pieceAlias)
             finalString = this.combinePieceStrings(finalString,pieceString)
