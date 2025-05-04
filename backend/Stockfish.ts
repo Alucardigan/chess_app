@@ -2,9 +2,9 @@ import AIPLayer from "./AIPlayer"
 import GameRunner from "./gameRunner"
 import { GameColor, GameType } from "./routeHandlers/helper"
 
-class Stockfish{
+export default class Stockfish{
     
-    async getBestMove(fenString: string){
+    static async getBestMove(fenString: string): Promise<{from:number,to:number}>{
         const endPoint ="https://stockfish.online/api/s/v2.php" 
         const queryParams = new URLSearchParams({
             fen: fenString,
@@ -22,13 +22,24 @@ class Stockfish{
             if (!response.ok) {
               throw new Error('Network response was not ok');
             }
-            return  response.json(); // or response.text() for other data types
+            return  response.json() as Promise<{bestmove:string}>; // or response.text() for other data types
         })
-        .then(data =>{
-            console.log(data)
-            return data 
+        .then((data:{bestmove:string}) =>{
+            let bestMove:string = data['bestmove'].split(" ")[1]
+            let movementSquares = []
+            let square = 0
+            for(let i = 0; i < bestMove.length;i++){
+                if(bestMove.charCodeAt(i)>57){//letters 
+                    square += bestMove.charCodeAt(i)-97
+                }
+                else{
+                    square += 8*(8 - Number(bestMove[i]))
+                    movementSquares.push(square)
+                    square = 0
+                }
+            }
+            console.log('stockfish',movementSquares)
+            return {from: movementSquares[0],to:movementSquares[1]} 
         })
     }
 }
-let a = new Stockfish()
-a.getBestMove("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1 1")

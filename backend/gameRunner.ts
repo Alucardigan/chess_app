@@ -30,10 +30,10 @@ class GameRunner{
         this.checkMate = undefined
         this.gameType = gameType
         this.gameChat = []
-        this.AIPlayer = new AIPLayer()
+        this.AIPlayer = new AIPLayer(GameColor.BLACK)
         this.staleMate = false
     }
-    makeMove(from:number,to:number){
+    async makeMove(from:number,to:number){
         
         const curBoard  = this.gameStates[this.gameStates.length-1]
         const fpiece = curBoard.determinePieceIdx(from)
@@ -61,26 +61,6 @@ class GameRunner{
             return
         }
         this.turns +=1 
-        if(this.gameType===GameType.AI){
-            let AIMove = this.AIPlayer.makeMove(this,fpiece < 6 ? GameColor.WHITE : GameColor.BLACK)
-            this.gameStates.push(AIMove)
-            if(GameRuleValidator.checkForCheck(fpiece < 6 ? 5: 11,AIMove,this.movegen)){
-                
-                if(GameRuleValidator.checkForMate(fpiece<6?5:11,AIMove,this.promotionTarget,this.movegen)){
-                    console.log("CHECKMATE",(this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK)
-                    this.checkMate = (this.turns%2==0) ? GameColor.WHITE : GameColor.BLACK
-                    this.turns +=1 
-                    return 
-                }
-                if(GameRuleValidator.checkForStalemate(fpiece < 6 ? 5: 11,AIMove,this.promotionTarget,this.movegen)){
-                    console.log("STALEMATE DETECTED")
-                    this.staleMate = true; 
-                    this.turns +=1;
-                    return
-                }
-            }
-            this.turns += 1
-        }
     }
     
     getPlayerByTurn(){
@@ -94,8 +74,8 @@ class GameRunner{
     getPieceColorByPosition(position:number){
         return this.gameStates[this.gameStates.length-1].determinePieceIdx(position)<6? GameColor.BLACK : GameColor.WHITE 
     }
-    convertToFen(gameRunner: GameRunner){
-        let gameState = gameRunner.gameStates[gameRunner.gameStates.length-1]
+    convertToFen(){
+        let gameState = this.gameStates[this.gameStates.length-1]
         let bitString = gameState.convertToString()
         let charArr:string[] = []
         let count = 0
@@ -119,7 +99,7 @@ class GameRunner{
             }
         }
         charArr.reverse()
-        charArr.push(gameRunner.getColorByTurn()===GameColor.WHITE ? " w " : " b " )
+        charArr.push(this.getColorByTurn()===GameColor.WHITE ? " w " : " b " )
         charArr.push(gameState.WHITE_KING_SIDE_CASTLE ? "K" : "")
 
         charArr.push(gameState.WHITE_QUEEN_SIDE_CASTLE ? "Q" : "")
@@ -129,7 +109,7 @@ class GameRunner{
         charArr.push(gameState.BLACK_QUEEN_SIDE_CASTLE ? "q" : "")
         charArr.push(" - ")
         charArr.push(String(1)+" ")
-        charArr.push(String(gameRunner.turns+1))
+        charArr.push(String(this.turns+1))
         
         return charArr.join("")
 

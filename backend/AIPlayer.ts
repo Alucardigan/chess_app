@@ -1,23 +1,33 @@
 import GameRuleValidator from "./GameRuleValidator"
+import Stockfish from "./Stockfish"
 import BitBoard from "./bitboard"
 import GameRunner from "./gameRunner"
 import MoveGenerator from "./moveGenerator"
-import { GameColor, GameType, PromotionTarget } from "./routeHandlers/helper"
+import { GameColor, GameStateException, GameType, PromotionTarget } from "./routeHandlers/helper"
 
 enum Difficulty {
     EASY,
     MEDIUM,
     HARD
 }
-
+interface GeneratedMove{
+    resBoard: BitBoard,
+    from: number,
+    to: number
+}
+interface AIMoveResponse{
+    from: number,
+    to:number
+}
 class AIPLayer{
     difficulty : Difficulty
     pointAllocation : Map<number, number>
     moveGenerator: MoveGenerator 
     promotionTarget : PromotionTarget
     depth : number
-    constructor(){
-        this.difficulty = Difficulty.MEDIUM 
+    color : GameColor
+    constructor(color: GameColor){
+        this.difficulty = Difficulty.HARD 
         this.pointAllocation = new Map()
         this.pointAllocation.set(0,-10)
         this.pointAllocation.set(1,-50)       
@@ -36,23 +46,28 @@ class AIPLayer{
             white : 10,
             black : 4
         }
+        this.color = color
         this.depth =2//depth of min max tree
 
     }
-    makeMove(gameRunner:GameRunner,gameColor:GameColor){
+    async getMove(gameRunner:GameRunner,gameColor:GameColor):Promise<AIMoveResponse>{
         let alpha = -Infinity;
         let beta = Infinity
+        //replace this part with strategy pattern
+        if(this.difficulty===Difficulty.HARD){
+            return this.stockFishApi(gameRunner,gameColor)
+        }
         if(this.difficulty===Difficulty.MEDIUM){
             let curBoard = gameRunner.gameStates[gameRunner.gameStates.length-1]
             let possibleMoves = this.generateMoves(curBoard,gameColor)
             if(!possibleMoves.length){
                 console.log("ERROR: AI has no moves. Stalemate detected??")
-                return curBoard
+                throw new GameStateException("AI Error","HIGH","ERROR: AI has no moves")
             }
             let bestMove = possibleMoves[0]
-            let bestMoveEval = this.MiniMax(bestMove,this.getOppositeColor(gameColor),this.depth,alpha,beta)
+            let bestMoveEval = this.MiniMax(bestMove.resBoard,this.getOppositeColor(gameColor),this.depth,alpha,beta)
             for(let i = 1 ; i < possibleMoves.length;i ++){
-                let posMoveEval =this.MiniMax(possibleMoves[i],this.getOppositeColor(gameColor),this.depth,alpha,beta)
+                let posMoveEval =this.MiniMax(possibleMoves[i].resBoard,this.getOppositeColor(gameColor),this.depth,alpha,beta)
                 if(gameColor===GameColor.WHITE &&bestMoveEval < posMoveEval){
                     bestMove = possibleMoves[i]
                     bestMoveEval = posMoveEval
@@ -62,9 +77,9 @@ class AIPLayer{
                     bestMoveEval = posMoveEval
                 }
             }
-            return bestMove
-
+            return {from: bestMove.from,to: bestMove.to}
         }
+       
         let curBoard = gameRunner.gameStates[gameRunner.gameStates.length-1]
         let possibleMoves = this.generateMoves(curBoard,gameColor)
         return this.randomMoves(possibleMoves)
@@ -75,7 +90,7 @@ class AIPLayer{
     */
     generateMoves(gameState: BitBoard,gameColor: GameColor){
         let startingIdx = gameColor === GameColor.BLACK ? 0 : 6;
-        let moves:BitBoard[] = []
+        let moves:GeneratedMove[] = []
         for(let i = startingIdx; i < startingIdx+6; i++){
             let fromSquares = this.getSquares(gameState.boardState[i])
             for(let j = 0; j< fromSquares.length;j++ ){
@@ -83,9 +98,13 @@ class AIPLayer{
                 let possibleMoves = moveResponse.moves | moveResponse.captures
                 let toSquares = this.getSquares(possibleMoves)
                 for(let k = 0; k < toSquares.length; k ++){
+                    if(fromSquares[j]===toSquares[k]){
+                        console.log("same squares")
+                        continue
+                    }
                     let newGameState = GameRuleValidator.testMove(fromSquares[j],toSquares[k],possibleMoves,this.promotionTarget,gameState)
                     if(!GameRuleValidator.checkForCheck(gameColor===GameColor.BLACK? 5 : 11,newGameState,this.moveGenerator)){
-                        moves.push(newGameState)   
+                        moves.push({resBoard:newGameState,from:fromSquares[j],to:toSquares[k]})   
                     }
                 }
                 
@@ -116,14 +135,14 @@ class AIPLayer{
         let possibleMoves = this.generateMoves(gameBoard,gameColor)
         for(let i = 0; i < possibleMoves.length; i ++){
             if(gameColor===GameColor.WHITE){
-                evaluation = Math.max(evaluation,this.MiniMax(possibleMoves[i],GameColor.BLACK,depth -1,alpha,beta))
+                evaluation = Math.max(evaluation,this.MiniMax(possibleMoves[i].resBoard,GameColor.BLACK,depth -1,alpha,beta))
                 alpha = Math.max(alpha,evaluation)
                 if(alpha >= beta){
                     break;
                 }
             }
             else{
-                evaluation = Math.min(evaluation,this.MiniMax(possibleMoves[i],GameColor.WHITE,depth -1,alpha,beta))
+                evaluation = Math.min(evaluation,this.MiniMax(possibleMoves[i].resBoard,GameColor.WHITE,depth -1,alpha,beta))
                 beta = Math.min(beta,evaluation)
                 if(beta <= alpha){
                     break;
@@ -133,9 +152,14 @@ class AIPLayer{
         }
         return evaluation
     }
-    randomMoves(moves:BitBoard[]){
+    async stockFishApi(gameRunner:GameRunner,gameColor:GameColor):Promise<AIMoveResponse>{
+        let stockfishResponse = await Stockfish.getBestMove(gameRunner.convertToFen())
+        return {from: stockfishResponse.from,to:stockfishResponse.to}
+
+}
+    randomMoves(moves:GeneratedMove[]):AIMoveResponse{
         const randomIdx = Math.floor(Math.random()*moves.length)
-        return moves[randomIdx]
+        return {from: moves[randomIdx].from,to:moves[randomIdx].to}
     }
     popCount(bitNumber:bigint){
         let count = 0 

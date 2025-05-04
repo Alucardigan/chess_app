@@ -53,9 +53,9 @@ io.on("connection", (socket:any) => {
     let gameEvent = GameStateManager.exportEventToSocket(gameID)
     io.to(gameID).emit('receiveGame',gameEvent)
   })
-  socket.on('movePiece',({gameID,userID,from,to}:{gameID:number,userID: String,from:number,to:number})=>{
+  socket.on('movePiece',async ({gameID,userID,from,to}:{gameID:number,userID: String,from:number,to:number})=>{
     try{
-      GameStateManager.handleMove(gameID,userID,from,to)
+      await GameStateManager.handleMove(gameID,userID,from,to)
     }catch(error){
       if(error instanceof GameStateException){
         console.log(error.priority,error.title,error.message)

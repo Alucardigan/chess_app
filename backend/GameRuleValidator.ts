@@ -82,6 +82,7 @@ export default class GameRuleValidator{
         const fromMask = 1n<< BigInt(from)
         let toMask = 1n << BigInt(to) & moves
         if(toMask===0n){
+            console.log("NON MOVE")
             return curBoard
         }
         const fpiece = curBoard.determinePieceIdx(from)

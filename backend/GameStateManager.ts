@@ -1,4 +1,4 @@
-import activeMatches, { GameColor, GameStateException } from "./routeHandlers/helper";
+import activeMatches, { GameColor, GameStateException, GameType } from "./routeHandlers/helper";
 
 interface GameEvent {
     bitString : string
@@ -9,7 +9,7 @@ interface GameEvent {
 }
 
 class GameStateManager{
-    static handleMove(gameID:number,userID:String , from:number,to:number){
+    static async handleMove(gameID:number,userID:String , from:number,to:number){
         const game = activeMatches.get(Number(gameID))//unsure why type casting is required here but it is 
         if(!game){
             throw new GameStateException("404 Game", "HIGH", "Game can't be found")
@@ -26,7 +26,12 @@ class GameStateManager{
 
             throw new GameStateException("400 Wrong Piece", "LOW", "Thats not your piece")
         }
-        game?.makeMove(from,to)
+        await game?.makeMove(from,to)
+        if(game.gameType===GameType.AI){
+            let AIMove = await game.AIPlayer.getMove(game,game.AIPlayer.color)
+            await game.makeMove(AIMove.from,AIMove.to)
+        }
+        console.log("event",game.gameStates[game.gameStates.length-1].convertToString(),game.gameStates.length)
     }
 
     static exportEventToSocket(gameID:number){

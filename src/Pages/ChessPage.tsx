@@ -55,6 +55,7 @@ function ChessPage(){
     //socket events 
     const onMove =(from:number,to:number)=>{
         if(socketRef.current){
+            console.log(from,to)
             const userID = (sessionStorage.getItem("chessGameUserID"))
             socketRef.current.emit('movePiece',{gameID,userID: userID,from,to})
         }
