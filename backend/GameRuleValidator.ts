@@ -1,6 +1,6 @@
 import BitBoard from "./bitboard"
 import MoveGenerator from "./moveGenerator"
-import {CastleRookMove, PromotionTarget} from "./routeHandlers/helper"
+import {CastleRookMove, GameAction, GameActionRequiredException, PromotionTarget} from "./routeHandlers/helper"
 
 export default class GameRuleValidator{    
     static checkForCheck(pieceIdx:number,bitboard:BitBoard,movegen:MoveGenerator):Boolean{
@@ -22,7 +22,7 @@ export default class GameRuleValidator{
 
     }
 
-    static checkForMate(pieceIdx:number,bitboard:BitBoard,promotionTarget:PromotionTarget,movegen:MoveGenerator):Boolean{
+    static checkForMate(pieceIdx:number,bitboard:BitBoard,promotionTarget:number,movegen:MoveGenerator):Boolean{
         let opposiingColorIdx = pieceIdx < 6 ? 0: 6 //get the opposing color's pawn index  
         //check if we are in check 
         if(GameRuleValidator.checkForCheck(pieceIdx < 6 ? 5:11,bitboard,movegen) === false){
@@ -49,7 +49,7 @@ export default class GameRuleValidator{
         }
         return true
     }
-    static checkForStalemate(pieceIdx:number,bitboard:BitBoard,promotionTarget:PromotionTarget,movegen:MoveGenerator){
+    static checkForStalemate(pieceIdx:number,bitboard:BitBoard,promotionTarget:number,movegen:MoveGenerator){
         const king = bitboard.boardState[pieceIdx < 6 ? 5:11]
         let opposiingColorIdx = pieceIdx < 6 ? 0: 6 //get the opposing color's pawn index  
         //check if we are in check 
@@ -76,7 +76,7 @@ export default class GameRuleValidator{
         }
         return false;
     }
-    static testMove(from:number,to:number,moves:bigint,promotionTarget:PromotionTarget,curBoard:BitBoard){
+    static testMove(from:number,to:number,moves:bigint,promotionTarget:number,curBoard:BitBoard){
         let resBoard = new BitBoard()
         resBoard.boardState = [...curBoard.boardState]//copy over the board
         const fromMask = 1n<< BigInt(from)
@@ -157,7 +157,36 @@ export default class GameRuleValidator{
         return newBoard
 
     }
-    static promotionUpdate(pieceIdx:number,newBoard:BitBoard,promotionTarget:PromotionTarget){
+    static promotionAvailableCheck(pieceIdx:number,newBoard:BitBoard){
+        console.log('idx',pieceIdx)
+        if(pieceIdx<6){
+            const PAWN_IDX = 0 
+            const targetRow = 0b1111111100000000000000000000000000000000000000000000000000000000n
+            let pawns = newBoard.boardState[PAWN_IDX];
+            pawns &= targetRow
+            
+            if(pawns===0n){
+                //no pawns to promote
+                return false
+            }
+            return true
+        }
+        else{
+            const PAWN_IDX = 6 
+            const targetRow = 0b0000000000000000000000000000000000000000000000000000000011111111n
+            let pawns = newBoard.boardState[PAWN_IDX];
+            newBoard.printBit(pawns)
+            pawns &= targetRow
+            newBoard.printBit(pawns)
+            if(pawns===0n){
+                //no pawns to promote
+                return false
+            }
+            return true
+        }
+    }
+    static promotionUpdate(pieceIdx:number,newBoard:BitBoard,promotionTarget:number){
+        console.log(pieceIdx,promotionTarget)
         if(pieceIdx<6){
             const PAWN_IDX = 0 
             const targetRow = 0b1111111100000000000000000000000000000000000000000000000000000000n
@@ -167,8 +196,9 @@ export default class GameRuleValidator{
                 //no pawns to promote
                 return newBoard
             }
+            
             newBoard.boardState[PAWN_IDX] &= ~pawns
-            newBoard.boardState[promotionTarget.black] |= pawns
+            newBoard.boardState[promotionTarget] |= pawns
             return newBoard
         }
         else{
@@ -180,8 +210,9 @@ export default class GameRuleValidator{
                 //no pawns to promote
                 return newBoard
             }
+            console.log(typeof(promotionTarget))
             newBoard.boardState[PAWN_IDX] &= ~pawns
-            newBoard.boardState[promotionTarget.white] |= pawns
+            newBoard.boardState[promotionTarget+PAWN_IDX] |= pawns
             return newBoard
         }
         

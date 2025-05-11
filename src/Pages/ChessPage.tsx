@@ -7,6 +7,7 @@ import Chat from "../Components/Chat";
 import { Box, Button, Flex, useDisclosure,useToast } from "@chakra-ui/react";
 import CheckmateDialogBox from "../Components/CheckmateDialogBox";
 import StalemateDialogBox from "../Components/StalemateDialogBox";
+import PromotionDialogBox from "../Components/PromotionDialogBox";
 
 function ChessPage(){
     //get the game state from game ID via request to backend
@@ -19,6 +20,7 @@ function ChessPage(){
 
     const { isOpen: isCheckmateOpen, onOpen: onOpenCheckmate, onClose: onCloseCheckmate } = useDisclosure()
     const { isOpen: isStalemateOpen, onOpen: onOpenStalemate, onClose: onCloseStalemate } = useDisclosure()
+    const { isOpen: isPromotionOpen, onOpen: onPromotionOpen, onClose: onPromotionClose } = useDisclosure()
     const [boardState,setBoardState] = useState<string>("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR")
     const winnerRef = useRef<string>("");
     const [isWhite, setIsWhite] = useState(sessionStorage.getItem("chessGameGameColor")==="white"?true:false);
@@ -45,6 +47,10 @@ function ChessPage(){
                 onOpenCheckmate()
             }
         })
+        socketRef.current.on("promotionChoiceRequired",()=>{
+            console.log("receivedpromotionrequest")
+            onPromotionOpen()
+        })
         socketRef.current.on("receiveError",(title:string,message:string)=>{
             onError(title,message)
         })
@@ -59,6 +65,14 @@ function ChessPage(){
             const userID = (sessionStorage.getItem("chessGameUserID"))
             socketRef.current.emit('movePiece',{gameID,userID: userID,from,to})
         }
+    }
+    const onPromotionSelect = (pieceIdx:number) =>{
+        if(socketRef.current){
+            console.log("promotion choice",pieceIdx)
+            const userID = (sessionStorage.getItem("chessGameUserID"))
+            socketRef.current.emit('promotionUpdate',{gameID,userID: userID,pieceIdx})
+        }
+
     }
     const onError= (title:string,description:string) =>{
         
@@ -85,6 +99,7 @@ function ChessPage(){
             <Button onClick={onOpenStalemate}>Stalemate</Button>
             <CheckmateDialogBox isOpen = {isCheckmateOpen} onClose={goHome} winner={winnerRef.current}/>
             <StalemateDialogBox isOpen = {isStalemateOpen} onClose={goHome}/>
+            <PromotionDialogBox isOpen = {isPromotionOpen} onClose={onPromotionClose} onSelect={onPromotionSelect} color="white"/>
             <Box flex={1} width={"200px"}>
                 {!isSocketConnected && <div>Chat is loading</div>}
                 {isSocketConnected && <Chat socketRef={socketRef.current} userID={userID} gameID={gameID}></Chat>}

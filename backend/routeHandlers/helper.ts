@@ -22,6 +22,16 @@ export class GameStateException extends Error{
         this.priority = priority
     }
 }
+export enum GameAction{
+    PromotionRequired
+}
+export class GameActionRequiredException extends Error{
+    gameAction: GameAction  
+    constructor(gameAction:GameAction ,message:string){
+        super(message)
+        this.gameAction = gameAction
+    }
+}
 export interface CastleRookMove {
     flag : Boolean,
     nflag : Boolean,

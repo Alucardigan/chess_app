@@ -3,8 +3,8 @@ const express = require('express');
 const cors = require('cors');
 import {Request,Response,NextFunction} from 'express';
 
-import activeMatches, { ChatMessage, GameStateException } from './routeHandlers/helper';
-import GameStateManager from './GameStateManager';
+import activeMatches, { ChatMessage, GameActionRequiredException, GameStateException } from './routeHandlers/helper';
+import GameStateManager, { GameActionRequired } from './GameStateManager';
 const gameCreator = require('./routes/gameCreationRoutes')
 const { Server } = require("socket.io");
 
@@ -39,6 +39,7 @@ app.use('/api/game/', gameCreator);
 
 io.on("connection", (socket:any) => {
   console.log('connected by',socket.id)
+  let promotionQueue = new Map();
   //game events
   socket.on('joinGame',({gameID,userID}:{gameID:number,userID:String})=>{
     let updatedPlayerInfo = activeMatches.get(Number(gameID))?.playerManager.getPlayerByID(String(userID))
@@ -53,9 +54,18 @@ io.on("connection", (socket:any) => {
     let gameEvent = GameStateManager.exportEventToSocket(gameID)
     io.to(gameID).emit('receiveGame',gameEvent)
   })
-  socket.on('movePiece',async ({gameID,userID,from,to}:{gameID:number,userID: String,from:number,to:number})=>{
+  socket.on('movePiece',async ({gameID,userID,from,to}:{gameID:number,userID: string,from:number,to:number})=>{
     try{
-      await GameStateManager.handleMove(gameID,userID,from,to)
+      let actionRequired = await GameStateManager.handleMove(gameID,userID,from,to)
+      if(actionRequired ===GameActionRequired.PROMOTION_REQUIRED){
+        console.log("promote me daddy")
+        socket.emit("promotionChoiceRequired")
+        const promotionPromise =new Promise((resolve)=>{
+          promotionQueue.set(`${gameID}-${userID}`,resolve)
+        })
+        await promotionPromise
+      }
+  
     }catch(error){
       if(error instanceof GameStateException){
         console.log(error.priority,error.title,error.message)
@@ -63,9 +73,19 @@ io.on("connection", (socket:any) => {
 
       }
     }
-
+    
     let gameEvent = GameStateManager.exportEventToSocket(gameID)
     io.to(gameID).emit('receiveGame',gameEvent)
+  })
+  socket.on("promotionUpdate",({gameID,userID,pieceIdx}:{gameID:number,userID:string,pieceIdx:number})=>{
+    GameStateManager.promotionUpdates(gameID,pieceIdx)
+    const key = `${gameID}-${userID}`;
+    //generated this idea from claude 
+    const resolvePromise = promotionQueue.get(key);
+    if (resolvePromise) {
+      resolvePromise();
+      promotionQueue.delete(key);
+    }
   })
   //chat events 
   socket.on('sendChatMessage',({gameID,userID,message}:{gameID:number,userID:string, message:string})=>{

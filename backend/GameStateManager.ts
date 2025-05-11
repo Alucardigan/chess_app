@@ -1,3 +1,4 @@
+import GameRuleValidator from "./GameRuleValidator";
 import activeMatches, { GameColor, GameStateException, GameType } from "./routeHandlers/helper";
 
 interface GameEvent {
@@ -5,7 +6,10 @@ interface GameEvent {
     checkmate : boolean
     stalemate : boolean
     winner : string | undefined
-
+}
+export enum GameActionRequired{
+    NO_ACTION,
+    PROMOTION_REQUIRED
 }
 
 class GameStateManager{
@@ -27,11 +31,19 @@ class GameStateManager{
             throw new GameStateException("400 Wrong Piece", "LOW", "Thats not your piece")
         }
         await game?.makeMove(from,to)
+        //gamecolor is opposite bc it just changed
+        console.log('checks',game.turns, game.getColorByTurn()===GameColor.WHITE?0:6,GameRuleValidator.promotionAvailableCheck(game.getColorByTurn()===GameColor.WHITE?0:6,game.gameStates[game.gameStates.length-1]))
+        if(GameRuleValidator.promotionAvailableCheck(game.getColorByTurn()===GameColor.WHITE?0:6,game.gameStates[game.gameStates.length-1])){
+            console.log("Promotion required")
+            game.turns -=1
+            return GameActionRequired.PROMOTION_REQUIRED
+        }
         if(game.gameType===GameType.AI){
             let AIMove = await game.AIPlayer.getMove(game,game.AIPlayer.color)
             await game.makeMove(AIMove.from,AIMove.to)
         }
         console.log("event",game.gameStates[game.gameStates.length-1].convertToString(),game.gameStates.length)
+        return GameActionRequired.NO_ACTION
     }
 
     static exportEventToSocket(gameID:number){
@@ -54,6 +66,17 @@ class GameStateManager{
             stalemate : game.staleMate
         }
         return gameEvent
+    }
+    static promotionUpdates(gameID:number,promotionChoice:number){
+        const game = activeMatches.get(Number(gameID))//unsure why type casting is required here but it is 
+        if(!game){
+            throw new GameStateException("404 Game", "HIGH", "Game can't be found")
+        }
+        let pieceIdx = game.getColorByTurn()===GameColor.BLACK ? 0:6
+        let lastGameState = game.gameStates[game.gameStates.length-1] 
+        game.gameStates.push(GameRuleValidator.promotionUpdate(pieceIdx,lastGameState,promotionChoice))
+        game.turns+=2
+        
     }
 
 

@@ -23,11 +23,11 @@ class AIPLayer{
     difficulty : Difficulty
     pointAllocation : Map<number, number>
     moveGenerator: MoveGenerator 
-    promotionTarget : PromotionTarget
+    promotionTarget : number
     depth : number
     color : GameColor
     constructor(color: GameColor){
-        this.difficulty = Difficulty.HARD 
+        this.difficulty = Difficulty.EASY 
         this.pointAllocation = new Map()
         this.pointAllocation.set(0,-10)
         this.pointAllocation.set(1,-50)       
@@ -42,10 +42,7 @@ class AIPLayer{
         this.pointAllocation.set(10,90)
         this.pointAllocation.set(11,900)
         this.moveGenerator  = new MoveGenerator()
-        this.promotionTarget = {
-            white : 10,
-            black : 4
-        }
+        this.promotionTarget = 4
         this.color = color
         this.depth =2//depth of min max tree
 

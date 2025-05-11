@@ -10,21 +10,19 @@ class GameRunner{
     //wanted a class that handles game moves that isnt the bitboard itself
     gameStates: BitBoard[]
     movegen:MoveGenerator
-    promotionTarget:PromotionTarget
+    promotionTarget:number
     playerManager: PlayerManager
     turns: number
+    //TODO: Remove checkmate and stalemate to be replaced with gamestatus or smth
     checkMate : GameColor | undefined //undefined on intialisation, is used to record the WINNER's color
     gameType : GameType
     gameChat: ChatMessage[]
-    AIPlayer: AIPLayer
+    AIPlayer: AIPLayer//TODO: SEPERATE THIS 
     staleMate : boolean
     constructor(gameType : GameType){
         this.gameStates = [new BitBoard()]
         this.movegen = new MoveGenerator()
-        this.promotionTarget = {
-            white : 10,
-            black : 4
-        }
+        this.promotionTarget = 0
         this.playerManager = new PlayerManager()
         this.turns = 0
         this.checkMate = undefined
@@ -41,6 +39,7 @@ class GameRunner{
         const {moves,captures} = this.movegen.generatePieceMove(from,fpiece,curBoard)
         let allMoves = moves | captures
         const newBoard = GameRuleValidator.testMove(from,to,allMoves,this.promotionTarget,curBoard)
+        
         if(GameRuleValidator.checkForCheck(fpiece,newBoard,this.movegen)){
             throw new GameStateException("405 In Check","LOW", "Can't move piece while in check")
         }
@@ -113,6 +112,9 @@ class GameRunner{
         
         return charArr.join("")
 
+    }
+    getLatestGameState(){
+        return this.gameStates[this.gameStates.length-1]
     }
 }
 export default GameRunner
