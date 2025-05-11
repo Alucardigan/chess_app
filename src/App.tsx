@@ -1,5 +1,3 @@
-
-import './App.css'
 import ChessPage from './Pages/ChessPage'
 import LandingPage from './Pages/LandingPage'
 import { BrowserRouter,Routes,Route } from 'react-router-dom'

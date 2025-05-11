@@ -11,6 +11,7 @@ interface ChatMessageFormat{
     chatMessage : string 
 }
 const Message = ({ username, chatMessage }: ChatMessageFormat) => {
+    
     return (
       <Flex
         p={1}
@@ -19,7 +20,7 @@ const Message = ({ username, chatMessage }: ChatMessageFormat) => {
         w="fit-content"
         alignSelf='flex-start'
       >
-        <Text>{username}: {chatMessage}</Text>
+        <Text>{String(username)==='0'?"WHITE":String(username)==='1'?"BLACK":username}: {chatMessage}</Text>
       </Flex>
     );
   };

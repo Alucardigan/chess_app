@@ -1,4 +1,4 @@
-import { SimpleGrid } from "@chakra-ui/react"
+import { Box, SimpleGrid, useMediaQuery } from "@chakra-ui/react"
 import Tile from "./Tile"
 
 
@@ -30,23 +30,44 @@ type Piece = {
     alias:string
 }
 function ChessBoard({boardState,isWhite, onMove}:{boardState:string,isWhite: boolean,onMove:(from:number,to:number)=>void}){
+    const [isLargerThan800] = useMediaQuery('(min-width: 800px)');
+    const tileSize = isLargerThan800 ? "80px" : "11vw"; // Responsive tile sizing
     //setup board
     const chessboard = isWhite ? boardState.split('') : boardState.split('').reverse()
     
     return (
-        <div>
-            <SimpleGrid
-                columns={8}
-                spacing={0}
-                width="fit-content"
-            >{chessboard.map((s,i)=>{
-                return <Tile key={isWhite ? i : 63 - i } tileKey={isWhite ? i : 63 - i} tileIdx={isWhite ? i : 63 - i} 
-                pieceLink={findPieceLink(s)} onMove={onMove}  />
-            })
-            }
-            </SimpleGrid>
-        </div>
-    )
+    <Box 
+      bg="#272522" 
+      p={3} 
+      borderRadius="md"
+      width="fit-content"
+      margin="0 auto"
+    >
+      <SimpleGrid
+        columns={8}
+        spacing={0}
+        width="fit-content"
+        boxShadow="lg"
+        borderRadius="sm"
+        overflow="hidden"
+      >
+        {chessboard.map((s, i) => {
+          const index = isWhite ? i : 63 - i;
+          return (
+            <Tile
+              key={index}
+              tileKey={index}
+              tileIdx={index}
+              pieceLink={findPieceLink(s)}
+              onMove={onMove}
+              tileSize={tileSize}
+            />
+          );
+        })}
+      </SimpleGrid>
+    </Box>
+  );
+
 }
 
 
