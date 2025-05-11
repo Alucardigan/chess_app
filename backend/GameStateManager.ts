@@ -32,7 +32,6 @@ class GameStateManager{
         }
         await game?.makeMove(from,to)
         //gamecolor is opposite bc it just changed
-        console.log('checks',game.turns, game.getColorByTurn()===GameColor.WHITE?0:6,GameRuleValidator.promotionAvailableCheck(game.getColorByTurn()===GameColor.WHITE?0:6,game.gameStates[game.gameStates.length-1]))
         if(GameRuleValidator.promotionAvailableCheck(game.getColorByTurn()===GameColor.WHITE?0:6,game.gameStates[game.gameStates.length-1])){
             console.log("Promotion required")
             game.turns -=1
