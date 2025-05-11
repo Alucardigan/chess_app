@@ -41,6 +41,12 @@ class GameStateManager{
         if(game.gameType===GameType.AI){
             let AIMove = await game.AIPlayer.getMove(game,game.AIPlayer.color)
             await game.makeMove(AIMove.from,AIMove.to)
+            if(GameRuleValidator.promotionAvailableCheck(game.getColorByTurn()===GameColor.WHITE?0:6,game.gameStates[game.gameStates.length-1])){
+                console.log("AI promotion",game.getColorByTurn(),game.turns)
+                game.turns -=1
+                this.promotionUpdates(gameID,game.AIPlayer.promotionTarget)
+                game.turns += 1
+            }
         }
         console.log("event",game.gameStates[game.gameStates.length-1].convertToString(),game.gameStates.length)
         return GameActionRequired.NO_ACTION

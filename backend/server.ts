@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 import {Request,Response,NextFunction} from 'express';
 
-import activeMatches, { ChatMessage, GameActionRequiredException, GameStateException } from './routeHandlers/helper';
+import activeMatches, { ChatMessage, GameStateException } from './routeHandlers/helper';
 import GameStateManager, { GameActionRequired } from './GameStateManager';
 const gameCreator = require('./routes/gameCreationRoutes')
 const { Server } = require("socket.io");
@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(cors(corsOptions));
 
 // Routes
-app.use((req:Request, res:Response, next:NextFunction) => {
+app.use((req:Request, _res:Response, next:NextFunction) => {
   console.log(req.path, req.method,req.body);
   next()
 });

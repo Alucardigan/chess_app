@@ -158,7 +158,7 @@ export default class GameRuleValidator{
 
     }
     static promotionAvailableCheck(pieceIdx:number,newBoard:BitBoard){
-        console.log('idx',pieceIdx)
+
         if(pieceIdx<6){
             const PAWN_IDX = 0 
             const targetRow = 0b1111111100000000000000000000000000000000000000000000000000000000n
@@ -175,9 +175,9 @@ export default class GameRuleValidator{
             const PAWN_IDX = 6 
             const targetRow = 0b0000000000000000000000000000000000000000000000000000000011111111n
             let pawns = newBoard.boardState[PAWN_IDX];
-            newBoard.printBit(pawns)
+
             pawns &= targetRow
-            newBoard.printBit(pawns)
+
             if(pawns===0n){
                 //no pawns to promote
                 return false
@@ -186,7 +186,7 @@ export default class GameRuleValidator{
         }
     }
     static promotionUpdate(pieceIdx:number,newBoard:BitBoard,promotionTarget:number){
-        console.log(pieceIdx,promotionTarget)
+
         if(pieceIdx<6){
             const PAWN_IDX = 0 
             const targetRow = 0b1111111100000000000000000000000000000000000000000000000000000000n
