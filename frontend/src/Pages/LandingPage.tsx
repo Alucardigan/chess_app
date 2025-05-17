@@ -20,7 +20,7 @@ function LandingPage(){
   };
   const createGame = async (type:String) =>{
     
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_TARGET}/api/game/${type}`,{
+    const response = await fetch(`/api/game/${type}`,{
       method:"POST",
       headers: {
         "Content-Type": "application/json" 
@@ -41,7 +41,7 @@ function LandingPage(){
     //this is necessary because default form submission reloads the page which messes with react states
     e.preventDefault();
 
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_TARGET}/api/game/joinGame`,{
+    const response = await fetch(`/api/game/joinGame`,{
       method:"POST",
       headers: {
         "Content-Type": "application/json" 
