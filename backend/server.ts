@@ -24,7 +24,8 @@ const io = new Server(httpServer, { cors: {
 //some middleware
 app.use(express.json());
 app.use(cors(corsOptions));
-
+const path = require('path')
+app.use(express.static(path.join(__dirname, '../dist')));
 // Routes
 app.use((req:Request, _res:Response, next:NextFunction) => {
   console.log(req.path, req.method,req.body);
@@ -32,7 +33,9 @@ app.use((req:Request, _res:Response, next:NextFunction) => {
 });
 app.use('/api/game/', gameCreator);
 
-
+app.get('*', (req:Request, res:Response) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
 // Start server
 
 //sockets
